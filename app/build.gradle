@@ -1,0 +1,98 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'co.riiid.gradle'
+apply plugin: 'com.github.triplet.play'
+
+def prevVersionName = "0.1.0"
+def prevVersionCode = 1
+def currVersionName = "0.1.0"
+def currVersionCode = 1
+def prevTagName = "${prevVersionName}.${prevVersionCode}"
+def currTagName = "${currVersionName}.${currVersionCode}"
+def changelog = """
+${prevTagName}...${currTagName}
+"""
+
+def props = new Properties()
+props.load(new FileInputStream(file('../local.properties')))
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        applicationId "io.github.yeobara.yeobara"
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode currVersionCode
+        versionName currVersionName
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(props.getProperty("store.file", ""))
+            storePassword props.getProperty("store.password", "")
+            keyAlias props.getProperty("key.alias", "")
+            keyPassword props.getProperty("key.password", "")
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '.SNAPSHOT'
+        }
+
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:appcompat-v7:23.1.0'
+    compile 'com.android.support:design:23.1.0'
+    compile 'io.reactivex:rxandroid:1.0.1'
+    compile 'io.reactivex:rxjava:1.0.14'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+}
+
+buildscript {
+    ext.kotlin_version = '1.0.0-beta-1103'
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'co.riiid:gradle-github-plugin:0.3.1'
+        classpath 'com.github.triplet.gradle:play-publisher:1.1.3'
+    }
+}
+
+github {
+    owner = 'yeobara'
+    repo = 'yeobara-android'
+    tagName = currTagName
+    token = props.get('github.token')
+    targetCommitish = 'master'
+    name = currTagName
+    body = changelog
+    prerelease = true
+    assets = [
+            'app/build/outputs/apk/app-release.apk',
+            'app/build/outputs/apk/app-debug.apk',
+            'app/build/outputs/mapping/release/mapping.txt',
+            'app/build/outputs/',
+    ]
+}
