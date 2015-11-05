@@ -4,13 +4,12 @@ apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
 def prevVersionName = "0.2.0"
-def prevVersionCode = 4
-def currVersionName = "0.2.0"
-def currVersionCode = 4
-def prevTagName = "${prevVersionName}.${prevVersionCode}"
-def currTagName = "${currVersionName}.${currVersionCode}"
+def currVersionName = "0.2.1"
+def currVersionCode = 5
+def prevTagName = "${prevVersionName}"
+def currTagName = "${currVersionName}"
 def changelog = """
-${prevTagName}...${currTagName}
+https://github.com/yeobara/yeobara-android/compare/${prevTagName}...${currTagName}
 """
 
 def props = new Properties()
