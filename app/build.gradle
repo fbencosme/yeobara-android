@@ -3,10 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
-def prevVersionName = "0.1.0"
-def prevVersionCode = 1
-def currVersionName = "0.1.0"
-def currVersionCode = 1
+def prevVersionName = "0.2.0"
+def prevVersionCode = 4
+def currVersionName = "0.2.0"
+def currVersionCode = 4
 def prevTagName = "${prevVersionName}.${prevVersionCode}"
 def currTagName = "${currVersionName}.${currVersionCode}"
 def changelog = """
@@ -21,8 +21,8 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "io.github.yeobara.yeobara"
-        minSdkVersion 16
+        applicationId "io.github.yeobara.android"
+        minSdkVersion 21
         targetSdkVersion 23
         versionCode currVersionCode
         versionName currVersionName
@@ -30,10 +30,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(props.getProperty("store.file", ""))
-            storePassword props.getProperty("store.password", "")
-            keyAlias props.getProperty("key.alias", "")
-            keyPassword props.getProperty("key.password", "")
+            storeFile file(props.getProperty("storeFile", ""))
+            storePassword props.getProperty("storePassword", "")
+            keyAlias props.getProperty("keyAlias", "")
+            keyPassword props.getProperty("keyPassword", "")
         }
     }
 
@@ -44,7 +44,8 @@ android {
         }
 
         release {
-            minifyEnabled true
+            signingConfig signingConfigs.release
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -55,14 +56,15 @@ android {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.android.support:design:23.1.0'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.4.2@aar'
     compile 'io.reactivex:rxandroid:1.0.1'
     compile 'io.reactivex:rxjava:1.0.14'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
 }
 
 buildscript {
@@ -84,7 +86,7 @@ github {
     owner = 'yeobara'
     repo = 'yeobara-android'
     tagName = currTagName
-    token = props.get('github.token')
+    token = props.get('githubToken')
     targetCommitish = 'master'
     name = currTagName
     body = changelog
@@ -95,4 +97,12 @@ github {
             'app/build/outputs/mapping/release/mapping.txt',
             'app/build/outputs/',
     ]
+}
+
+play {
+    serviceAccountEmail = props.get('playStorePublisher')
+    pk12File = file(props.get('playStoreP12File'))
+    track = 'beta' // 'production' or 'rollout' or 'beta' or 'alpha'
+    // userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1
+    uploadImages = true
 }

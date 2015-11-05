@@ -2,6 +2,7 @@ package io.github.importre.eddystone
 
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.util.Log
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallback() {
 
+    private val TAG = "[EDDYSTONE] ScanHandler"
     private val LOST_TIME: Long = 3000L
     private val deviceToBeaconMap = HashMap<String /* device address */, Beacon>()
     private val beacons = arrayListOf<Beacon>()
@@ -19,7 +21,7 @@ class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallback() {
     override fun onScanFailed(errorCode: Int) {
         when (errorCode) {
             ScanCallback.SCAN_FAILED_ALREADY_STARTED ->
-                eddyStoneCallback.onFailure("SCAN_FAILED_ALREADY_STARTED")
+                Log.e(TAG, "SCAN_FAILED_ALREADY_STARTED")
             ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED ->
                 eddyStoneCallback.onFailure("SCAN_FAILED_APPLICATION_REGISTRATION_FAILED")
             ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED ->

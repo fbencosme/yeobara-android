@@ -15,8 +15,7 @@ public class EddyStone(activity: Activity, val cb: EddyStoneCallback) {
 
     companion object {
         public val UUID: ParcelUuid = ParcelUuid.fromString("0000FEAA-0000-1000-8000-00805F9B34FB")
-
-        private val REQUEST_ENABLE_BLUETOOTH: Int = 100
+        public val REQUEST_ENABLE_BLUETOOTH: Int = 100
     }
 
     private val scanFilterList: ArrayList<ScanFilter> = arrayListOf()

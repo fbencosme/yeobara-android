@@ -35,6 +35,11 @@ public class BeaconsAdapter(val context: Context, val beacons: ArrayList<Beacon>
         notifyDataSetChanged()
     }
 
+    public fun clear() {
+        beacons.clear()
+        notifyDataSetChanged()
+    }
+
     inner class BeaconHolder(val view: View) : RecyclerView.ViewHolder(view) {
         fun update(beacon: Beacon) {
             val urlView = view.getTag(R.id.url) as TextView
