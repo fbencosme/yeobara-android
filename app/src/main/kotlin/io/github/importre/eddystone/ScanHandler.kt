@@ -86,6 +86,7 @@ class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallback() {
     }
 
     public fun start() {
+        lostSub?.unsubscribe()
         lostSub = newLostObserver().subscribe({
             val time = System.currentTimeMillis()
             val iter = deviceToBeaconMap.entries.iterator()
