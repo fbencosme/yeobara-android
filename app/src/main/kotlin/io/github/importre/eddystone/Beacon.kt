@@ -123,7 +123,7 @@ public class Beacon internal constructor(val deviceAddress: String, var rssi: In
         }
 
         fun url(): String {
-            return toString()
+            return urlValue ?: ""
         }
     }
 

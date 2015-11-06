@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import io.github.importre.eddystone.Beacon
 import java.util.*
 
@@ -58,6 +59,7 @@ public class BeaconsAdapter(val context: Context, val beacons: ArrayList<Beacon>
                 intent.setData(uri)
                 context.startActivity(intent)
             } catch (e: Exception) {
+                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             }
         }
     }
