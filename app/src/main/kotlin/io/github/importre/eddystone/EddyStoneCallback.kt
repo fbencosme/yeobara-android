@@ -2,7 +2,7 @@ package io.github.importre.eddystone
 
 import java.util.*
 
-interface EddyStoneCallback {
+public interface EddyStoneCallback {
 
     fun onSuccess(beacons: ArrayList<Beacon>)
 

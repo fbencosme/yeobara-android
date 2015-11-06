@@ -10,7 +10,7 @@ import rx.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallback() {
+internal class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallback() {
 
     private val TAG = "[EDDYSTONE] ScanHandler"
     private val LOST_TIME: Long = 3000L

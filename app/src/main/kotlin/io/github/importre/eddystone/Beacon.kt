@@ -14,7 +14,7 @@
 
 package io.github.importre.eddystone
 
-class Beacon internal constructor(val deviceAddress: String, var rssi: Int) {
+public class Beacon internal constructor(val deviceAddress: String, var rssi: Int) {
     // TODO: rename to make explicit the validation intent of this timestamp. We use it to
     // remember a recent frame to make sure that non-monotonic TLM values increase.
     internal var timestamp = System.currentTimeMillis()
