@@ -8,6 +8,7 @@ import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import com.firebase.client.Firebase
 import com.tbruyelle.rxpermissions.RxPermissions
 import io.github.importre.eddystone.Beacon
 import io.github.importre.eddystone.EddyStone
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity(), EddyStoneCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Firebase.setAndroidContext(this)
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         checkPermission()
