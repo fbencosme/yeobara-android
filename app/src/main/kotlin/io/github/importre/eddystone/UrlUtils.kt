@@ -77,9 +77,9 @@ internal object UrlUtils {
     }
 
     fun decodeUrl(serviceData: ByteArray, offset: Int, urlBuilder: StringBuilder): String {
-        var offset = offset
-        while (offset < serviceData.size()) {
-            val b = serviceData[offset++]
+        var o = offset
+        while (o < serviceData.size) {
+            val b = serviceData[o++]
             val code = URL_CODES.get(b.toInt())
             if (code != null) {
                 urlBuilder.append(code)
