@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <dimen name="avatar_icon_size">56dp</dimen>
+    <dimen name="screen_edge_margin">24dp</dimen>
+    <dimen name="screen_edge_margin_twice">48dp</dimen>
+    <dimen name="screen_edge_margin_half">12dp</dimen>
+    <dimen name="screen_edge_margin2">104dp</dimen>
+    <dimen name="title_height">72dp</dimen>
+    <dimen name="subtitle_height">56dp</dimen>
+    <dimen name="list_item_height">64dp</dimen>
+    <dimen name="list_item_height_xlarge">112dp</dimen>
+    <dimen name="space_between_content_area">12dp</dimen>
+    <dimen name="space_between_content_area_half">6dp</dimen>
+    <dimen name="toolbar_title_size">18sp</dimen>
+    <dimen name="toolbar_subtitle_size">12sp</dimen>
+    <dimen name="toolbar_title_m_size">14sp</dimen>
+    <dimen name="min_card_height">240dp</dimen>
+    <dimen name="divider_height">4dp</dimen>
+
+    <dimen name="meetup_card_margin_vertical">16dp</dimen>
+    <dimen name="meetup_card_margin_horizontal">16dp</dimen>
+    <dimen name="meetup_list_margin_vertical">0dp</dimen>
+</resources>

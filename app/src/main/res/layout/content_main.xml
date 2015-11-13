@@ -12,5 +12,9 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/meetup_list_margin_vertical"
+        android:paddingRight="@dimen/meetup_list_margin_vertical"
+        android:paddingTop="@dimen/meetup_card_margin_horizontal" />
 </RelativeLayout>

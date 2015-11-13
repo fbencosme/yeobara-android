@@ -1,4 +1,4 @@
-package io.github.yeobara.android
+package io.github.yeobara.android.beacon
 
 import android.content.Context
 import android.content.Intent
@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import io.github.importre.eddystone.Beacon
+import io.github.yeobara.android.R
 import java.util.*
 
 public class BeaconsAdapter(val context: Context, val beacons: ArrayList<Beacon>) :
