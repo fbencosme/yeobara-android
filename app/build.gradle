@@ -17,7 +17,7 @@ props.load(new FileInputStream(file('../local.properties')))
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "io.github.yeobara.android"
@@ -65,8 +65,10 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:design:23.1.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:cardview-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.firebase:firebase-client-android:2.4.0'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.4.2@aar'
     compile 'io.reactivex:rxandroid:1.0.1'
