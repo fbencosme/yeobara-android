@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.view.View
-import com.firebase.client.Firebase
 import io.github.yeobara.android.meetup.MeetupAdapter
 import io.github.yeobara.android.meetup.UpdateListener
 import io.github.yeobara.android.utils.NetworkUtils
@@ -15,16 +14,8 @@ import kotlinx.android.synthetic.content_main.recyclerView
 
 class MainActivity : AppCompatActivity(), UpdateListener {
 
-    private val fb: Firebase by lazy {
-        Firebase("https://yeobara.firebaseio.com")
-    }
-
-    private val meetups: Firebase by lazy {
-        fb.child("meetups")
-    }
-
     private val adapter: MeetupAdapter by lazy {
-        MeetupAdapter(this, meetups.orderByChild("date"), this)
+        MeetupAdapter(this, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

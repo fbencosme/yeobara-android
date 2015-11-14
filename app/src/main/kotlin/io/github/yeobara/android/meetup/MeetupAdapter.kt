@@ -8,17 +8,16 @@ import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import com.firebase.client.ChildEventListener
-import com.firebase.client.DataSnapshot
-import com.firebase.client.FirebaseError
-import com.firebase.client.Query
+import com.firebase.client.*
 import io.github.yeobara.android.R
+import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.StringUtils
 import java.util.*
 
-public class MeetupAdapter(val context: Context, val query: Query, val listener: UpdateListener) :
+public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     public val keys: ArrayList<String> = arrayListOf()
@@ -26,6 +25,14 @@ public class MeetupAdapter(val context: Context, val query: Query, val listener:
 
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
+
+    private val meetupsRef: Firebase by lazy {
+        Firebase("https://yeobara.firebaseio.com/meetups")
+    }
+
+    private val query: Query by lazy {
+        meetupsRef.orderByChild("date")
+    }
 
     init {
         childEventListener = initChildEventListener()
@@ -40,8 +47,9 @@ public class MeetupAdapter(val context: Context, val query: Query, val listener:
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         if (holder is MeetupHolder) {
+            val key = keys[position]
             val meetup = meetups[position]
-            holder.setItem(meetup)
+            holder.setItem(key, meetup)
         }
     }
 
@@ -59,11 +67,13 @@ public class MeetupAdapter(val context: Context, val query: Query, val listener:
         view.setTag(R.id.attendees_count, view.findViewById(R.id.attendees_count))
         view.setTag(R.id.date, view.findViewById(R.id.date))
         view.setTag(R.id.description, view.findViewById(R.id.description))
+        view.setTag(R.id.rvsp, view.findViewById(R.id.rvsp))
+        view.setTag(R.id.checkin, view.findViewById(R.id.checkin))
         return MeetupHolder(view)
     }
 
     inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        fun setItem(meetup: Meetup) {
+        fun setItem(key: String, meetup: Meetup) {
             val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
             toolbar.title = meetup.friendlyName
             toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
@@ -73,6 +83,21 @@ public class MeetupAdapter(val context: Context, val query: Query, val listener:
 
             val descriptionView = view.getTag(R.id.description) as TextView
             descriptionView.text = meetup.description
+
+            val fingerprint = AppUtils.getFingerprint()
+            val rvsp = view.getTag(R.id.rvsp) as CheckBox
+            rvsp.isChecked = meetup.attendees.sumBy {
+                if (it.fingerprint.equals(fingerprint)) 1 else 0
+            } == 1
+            rvsp.setOnCheckedChangeListener { button, checked ->
+                val attendee = if (checked) {
+                    Attendee(fingerprint, System.currentTimeMillis(), "test", "rvsp")
+                } else {
+                    null
+                }
+                val map = hashMapOf(Pair(fingerprint, attendee))
+                meetupsRef.child("$key/attendees").setValue(map)
+            }
 
             val attendeeCount = view.getTag(R.id.attendees_count) as TextView
             attendeeCount.text = meetup.attendees.size.toString()

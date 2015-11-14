@@ -92,16 +92,17 @@
             </LinearLayout>
 
             <ViewSwitcher
+                android:id="@+id/switcher"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true">
 
                 <CheckBox
-                    android:id="@+id/rsvp"
+                    android:id="@+id/rvsp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/rsvp" />
+                    android:text="@string/rvsp" />
 
                 <CheckBox
                     android:id="@+id/checkin"
