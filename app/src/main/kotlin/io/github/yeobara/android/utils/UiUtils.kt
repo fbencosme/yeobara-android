@@ -1,4 +1,4 @@
-package io.github.yeobara.android
+package io.github.yeobara.android.utils
 
 import android.content.Context
 import android.content.res.Configuration
