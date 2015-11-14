@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardview"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/min_card_height"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_marginBottom="@dimen/meetup_card_margin_horizontal"
     android:layout_marginLeft="@dimen/meetup_card_margin_vertical"
@@ -23,36 +23,93 @@
             app:subtitleTextAppearance="@style/ActionBar.SubTitleText.Inverse"
             app:titleTextAppearance="@style/ActionBar.TitleText.Inverse" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_margin="@dimen/screen_edge_margin"
+            android:layout_weight="1"
+            android:divider="@drawable/divider"
+            android:orientation="vertical"
+            android:showDividers="middle">
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/space_between_content_area"
+                android:drawableStart="@drawable/ic_event"
+                android:singleLine="true"
+                tools:text="2015-11-14" />
 
-        <LinearLayout
-            android:id="@+id/attendees"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/space_between_content_area"
+                android:drawableStart="@drawable/ic_location_on"
+                android:singleLine="true"
+                tools:text="Seoul, Korea" />
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/space_between_content_area"
+                android:drawableStart="@drawable/ic_description"
+                tools:text="description" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_gravity="end|center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:orientation="horizontal"
             android:paddingLeft="@dimen/screen_edge_margin"
             android:paddingRight="@dimen/screen_edge_margin">
 
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_person" />
-
-            <TextView
-                android:id="@+id/attendees_count"
+            <LinearLayout
+                android:id="@+id/attendees"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:gravity="center"
-                tools:text="10" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:orientation="horizontal">
 
-        </LinearLayout>
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_person" />
+
+                <TextView
+                    android:id="@+id/attendees_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    tools:text="10" />
+            </LinearLayout>
+
+            <ViewSwitcher
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true">
+
+                <CheckBox
+                    android:id="@+id/rsvp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rsvp" />
+
+                <CheckBox
+                    android:id="@+id/checkin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/checkin" />
+            </ViewSwitcher>
+
+        </RelativeLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>

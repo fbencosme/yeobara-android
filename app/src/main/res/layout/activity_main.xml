@@ -28,7 +28,8 @@
             android:layout_marginBottom="-8dp"
             android:indeterminate="true"
             android:indeterminateTint="@android:color/white"
-            android:indeterminateTintMode="src_in" />
+            android:indeterminateTintMode="src_in"
+            android:visibility="gone" />
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_main" />

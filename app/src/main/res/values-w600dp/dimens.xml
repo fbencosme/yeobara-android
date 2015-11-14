@@ -12,8 +12,8 @@
     <dimen name="list_item_height_xlarge">112dp</dimen>
     <dimen name="space_between_content_area">12dp</dimen>
     <dimen name="space_between_content_area_half">6dp</dimen>
-    <dimen name="toolbar_title_size">18sp</dimen>
-    <dimen name="toolbar_subtitle_size">12sp</dimen>
+    <dimen name="toolbar_title_size">20sp</dimen>
+    <dimen name="toolbar_subtitle_size">14sp</dimen>
     <dimen name="toolbar_title_m_size">14sp</dimen>
     <dimen name="min_card_height">240dp</dimen>
     <dimen name="divider_height">4dp</dimen>

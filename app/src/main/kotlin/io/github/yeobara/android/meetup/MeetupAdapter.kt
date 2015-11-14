@@ -15,17 +15,86 @@ import com.firebase.client.DataSnapshot
 import com.firebase.client.FirebaseError
 import com.firebase.client.Query
 import io.github.yeobara.android.R
+import io.github.yeobara.android.utils.StringUtils
 import java.util.*
 
-public class MeetupAdapter(val context: Context, val query: Query) :
+public class MeetupAdapter(val context: Context, val query: Query, val listener: UpdateListener) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     public val keys: ArrayList<String> = arrayListOf()
     public val meetups: ArrayList<Meetup> = arrayListOf()
+
     private var eventListener: ChildEventListener
+    private val childEventListener: ChildEventListener
 
     init {
-        eventListener = query.addChildEventListener(object : ChildEventListener {
+        childEventListener = initChildEventListener()
+        eventListener = query.addChildEventListener(childEventListener)
+    }
+
+    public fun clear() {
+        keys.clear()
+        meetups.clear()
+        query.removeEventListener(eventListener)
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+        if (holder is MeetupHolder) {
+            val meetup = meetups[position]
+            holder.setItem(meetup)
+        }
+    }
+
+    override fun getItemCount(): Int = meetups.size
+
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
+        if (parent == null) {
+            return null
+        }
+
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.meetup_card, parent, false)
+        view.setTag(R.id.card_toolbar, view.findViewById(R.id.card_toolbar))
+        view.setTag(R.id.attendees, view.findViewById(R.id.attendees))
+        view.setTag(R.id.attendees_count, view.findViewById(R.id.attendees_count))
+        view.setTag(R.id.date, view.findViewById(R.id.date))
+        view.setTag(R.id.description, view.findViewById(R.id.description))
+        return MeetupHolder(view)
+    }
+
+    inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        fun setItem(meetup: Meetup) {
+            val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
+            toolbar.title = meetup.friendlyName
+            toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
+
+            val dateView = view.getTag(R.id.date) as TextView
+            dateView.text = meetup.date
+
+            val descriptionView = view.getTag(R.id.description) as TextView
+            descriptionView.text = meetup.description
+
+            val attendeeCount = view.getTag(R.id.attendees_count) as TextView
+            attendeeCount.text = meetup.attendees.size.toString()
+
+            val attendees = view.getTag(R.id.attendees) as View
+            attendees.setOnClickListener {
+                val attendeeAdapter = AttendeeAdapter(context, meetup.attendees)
+                AlertDialog.Builder(context)
+                        .setTitle(R.string.dialog_title_attendees)
+                        .setAdapter(attendeeAdapter, object : DialogInterface.OnClickListener {
+                            override fun onClick(dialog: DialogInterface?, which: Int) {
+                                val nickname = meetup.attendees[which].nickname
+                                Toast.makeText(context, nickname, Toast.LENGTH_SHORT).show()
+                            }
+                        })
+                        .show()
+            }
+        }
+    }
+
+    private fun initChildEventListener(): ChildEventListener {
+        return object : ChildEventListener {
             override fun onChildRemoved(snapshot: DataSnapshot?) {
                 if (snapshot == null) return
                 val key = snapshot.key
@@ -71,6 +140,7 @@ public class MeetupAdapter(val context: Context, val query: Query) :
 
                 addAttendees(meetup, snapshot)
                 update(key, meetup, prevKey)
+                listener.onAdded()
             }
 
             private fun update(key: String, meetup: Meetup, prevKey: String?) {
@@ -96,56 +166,6 @@ public class MeetupAdapter(val context: Context, val query: Query) :
                 snapshot.child("attendees").children.forEach {
                     meetup.attendees.add(it.getValue(Attendee::class.java))
                 }
-            }
-        })
-    }
-
-    public fun clear() {
-        keys.clear()
-        meetups.clear()
-        query.removeEventListener(eventListener)
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
-        if (holder is MeetupHolder) {
-            val meetup = meetups[position]
-            holder.setItem(meetup)
-        }
-    }
-
-    override fun getItemCount(): Int = meetups.size
-
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
-        if (parent == null) {
-            return null
-        }
-
-        val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.meetup_card, parent, false)
-        view.setTag(R.id.card_toolbar, view.findViewById(R.id.card_toolbar))
-        view.setTag(R.id.attendees, view.findViewById(R.id.attendees))
-        view.setTag(R.id.attendees_count, view.findViewById(R.id.attendees_count))
-        return MeetupHolder(view)
-    }
-
-    inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        fun setItem(meetup: Meetup) {
-            val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
-            toolbar.title = meetup.friendlyName
-            toolbar.subtitle = meetup.description
-
-            (view.getTag(R.id.attendees_count) as TextView).text = meetup.attendees.size.toString()
-            (view.getTag(R.id.attendees) as View).setOnClickListener {
-                val attendeeAdapter = AttendeeAdapter(context, meetup.attendees)
-                AlertDialog.Builder(context)
-                        .setTitle(R.string.dialog_title_attendees)
-                        .setAdapter(attendeeAdapter, object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-                                val nickname = meetup.attendees[which].nickname
-                                Toast.makeText(context, nickname, Toast.LENGTH_SHORT).show()
-                            }
-                        })
-                        .show()
             }
         }
     }
