@@ -114,14 +114,12 @@ public class MeetupAdapter(val activity: Activity,
             setCheckListener(key, rvsp, "rvsp")
 
             val checkin = view.getTag(R.id.checkin) as CheckBox
-            checkin.visibility = View.GONE
             setCheckListener(key, checkin, "checkin")
 
             meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(p0: DataSnapshot?) {
                             rvsp.isChecked = p0?.value != null
-                            checkin.visibility = if (rvsp.isChecked) View.VISIBLE else View.GONE
                             p0?.getValue(Attendee::class.java)?.let { attendee ->
                                 checkin.isChecked = "checkin".equals(attendee.status)
                             }
@@ -148,8 +146,16 @@ public class MeetupAdapter(val activity: Activity,
 
         private fun initToolbar(meetup: Meetup) {
             val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
-            val nearest = if (meetup.nearest) " *" else ""
-            toolbar.title = "${meetup.friendlyName}$nearest"
+            if (meetup.nearest) {
+                toolbar.setBackgroundResource(R.color.colorAccent)
+                toolbar.setTitleTextAppearance(activity, R.style.ActionBar_TitleText)
+                toolbar.setSubtitleTextAppearance(activity, R.style.ActionBar_SubTitleText)
+            } else {
+                toolbar.background = null
+                toolbar.setTitleTextAppearance(activity, R.style.ActionBar_TitleText_Inverse)
+                toolbar.setSubtitleTextAppearance(activity, R.style.ActionBar_SubTitleText_Inverse)
+            }
+            toolbar.title = meetup.friendlyName
             toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
         }
 
