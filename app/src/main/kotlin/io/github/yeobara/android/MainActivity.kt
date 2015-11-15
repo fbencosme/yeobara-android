@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity(), UpdateListener {
         val nicknameView = view.findViewById(R.id.nickname) as EditText
         AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_signup)
+                .setIcon(R.mipmap.ic_launcher)
                 .setView(view)
                 .setNegativeButton(android.R.string.cancel, { dialog, which ->
                 })
@@ -100,8 +101,7 @@ class MainActivity : AppCompatActivity(), UpdateListener {
                     nicknameView.text?.toString()?.let {
                         if (it.isNotEmpty()) {
                             val attendee = Attendee(id, System.currentTimeMillis(), it, "")
-                            val map = hashMapOf(Pair(id, attendee))
-                            userRef.setValue(map)
+                            userRef.child(id).setValue(attendee)
                         }
                     }
                 })

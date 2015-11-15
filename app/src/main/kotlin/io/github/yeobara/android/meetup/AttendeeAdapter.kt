@@ -6,13 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import io.github.yeobara.android.R
 import java.util.*
 
 public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee>) :
         ArrayAdapter<Attendee>(context, AttendeeAdapter.LAYOUT, attendees) {
 
     companion object {
-        val LAYOUT = android.R.layout.simple_list_item_1
+        val LAYOUT = R.layout.layout_two_line
     }
 
     override fun getCount(): Int = attendees.size
@@ -22,14 +23,26 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
-        val view = if (convertView == null) {
+        val view: View
+        val title: TextView
+        val subtitle: TextView
+
+        if (convertView == null) {
             val inflater = LayoutInflater.from(context)
-            inflater.inflate(LAYOUT, parent, false) as TextView
+            view = inflater.inflate(LAYOUT, parent, false)
+            title = view.findViewById(R.id.title) as TextView
+            subtitle = view.findViewById(R.id.subtitle) as TextView
+            view.setTag(R.id.title, title)
+            view.setTag(R.id.subtitle, subtitle)
         } else {
-            convertView as TextView
+            view = convertView
+            title = view.findViewById(R.id.title) as TextView
+            subtitle = view.findViewById(R.id.subtitle) as TextView
         }
 
-        view.text = getItem(position).nickname
+        val item = getItem(position)
+        title.text = item.nickname
+        subtitle.text = item.status
         return view
     }
 }

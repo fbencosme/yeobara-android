@@ -81,6 +81,110 @@ public class MeetupAdapter(val activity: Activity,
         return MeetupHolder(view)
     }
 
+    private fun initChildEventListener(): ChildEventListener {
+        return object : ChildEventListener {
+            override fun onChildRemoved(snapshot: DataSnapshot?) {
+                if (snapshot == null) return
+                val key = snapshot.key
+                val index = keys.indexOf(key)
+
+                if (index >= 0 && meetups.size > index) {
+                    keys.removeAt(index)
+                    meetups.removeAt(index)
+                    notifyDataSetChanged()
+                }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot?, prevKey: String?) {
+                if (snapshot == null) return
+                val key = snapshot.key
+                val meetup = snapshot.getValue(Meetup::class.java)
+                val index = keys.indexOf(key)
+
+                if (index >= 0 && meetups.size > index) {
+                    addAttendees(meetup, snapshot)
+                    meetups.set(index, meetup)
+                    notifyItemChanged(index)
+                }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot?, prevKey: String?) {
+                if (snapshot == null) return
+                val key = snapshot.key
+                val meetup = snapshot.getValue(Meetup::class.java)
+                val index = keys.indexOf(key)
+
+                if (index >= 0 && meetups.size > index) {
+                    addAttendees(meetup, snapshot)
+                    keys.removeAt(index)
+                    meetups.removeAt(index)
+                    val newIndex = if (prevKey == null) 0 else index + 1
+                    keys.add(newIndex, key)
+                    meetups.add(newIndex, meetup)
+                    notifyDataSetChanged()
+                }
+            }
+
+            override fun onChildAdded(snapshot: DataSnapshot?, prevKey: String?) {
+                if (snapshot == null) return
+                val key = snapshot.key
+                val meetup = snapshot.getValue(Meetup::class.java)
+
+                addAttendees(meetup, snapshot)
+                keys.add(key)
+                meetups.add(meetup)
+                notifyDataSetChanged()
+                listener.onAdded()
+            }
+
+            override fun onCancelled(snapshot: FirebaseError?) {
+            }
+
+            private fun addAttendees(meetup: Meetup, snapshot: DataSnapshot) {
+                snapshot.child("attendees").children.forEach {
+                    meetup.attendees.add(it.getValue(Attendee::class.java))
+                }
+            }
+        }
+    }
+
+    fun setUser(user: Attendee?) {
+        this.user = user
+        notifyDataSetChanged()
+    }
+
+    override fun onSuccess(beacons: ArrayList<Beacon>) {
+        meetups.forEachIndexed { i, meetup ->
+            val nearest = containsHashcode(beacons, meetup.hashcode)
+            if (meetup.nearest != nearest) {
+                meetup.nearest = nearest
+                notifyItemChanged(i)
+            }
+        }
+    }
+
+    private fun containsHashcode(beacons: ArrayList<Beacon>, hashcode: String): Boolean {
+        for (beacon in beacons) {
+            val url = beacon.urlStatus.url()
+            if (url.endsWith(hashcode)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun onFailure(message: String, deviceAddress: String?) {
+    }
+
+    fun startEddyStone() {
+        eddystone.stop()
+        eddystone.start()
+    }
+
+    fun stopEddyStone() {
+        eddystone.stop()
+    }
+
     inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {
         fun setItem(key: String, meetup: Meetup) {
             initToolbar(meetup)
@@ -169,117 +273,11 @@ public class MeetupAdapter(val activity: Activity,
 
                         val id = AppUtils.getFingerprint()
                         val attendee = if (it.status.isNotEmpty()) it else null
-                        val map = hashMapOf(Pair(id, attendee))
-                        meetupsRef.child("$key/attendees").setValue(map)
+                        meetupsRef.child("$key/attendees/$id").setValue(attendee)
                     }
                 }
             }
         }
-    }
-
-    private fun initChildEventListener(): ChildEventListener {
-        return object : ChildEventListener {
-            override fun onChildRemoved(snapshot: DataSnapshot?) {
-                if (snapshot == null) return
-                val key = snapshot.key
-                val index = keys.indexOf(key)
-
-                if (index >= 0 && meetups.size > index) {
-                    keys.removeAt(index)
-                    meetups.removeAt(index)
-                    notifyDataSetChanged()
-                }
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot?, prevKey: String?) {
-                if (snapshot == null) return
-                val key = snapshot.key
-                val meetup = snapshot.getValue(Meetup::class.java)
-                val index = keys.indexOf(key)
-
-                if (index >= 0 && meetups.size > index) {
-                    addAttendees(meetup, snapshot)
-                    meetups.set(index, meetup)
-                    notifyItemChanged(index)
-                }
-            }
-
-            override fun onChildMoved(snapshot: DataSnapshot?, prevKey: String?) {
-                if (snapshot == null) return
-                val key = snapshot.key
-                val meetup = snapshot.getValue(Meetup::class.java)
-                val index = keys.indexOf(key)
-
-                if (index >= 0 && meetups.size > index) {
-                    addAttendees(meetup, snapshot)
-                    keys.removeAt(index)
-                    meetups.removeAt(index)
-                    val newIndex = if (prevKey == null) 0 else index + 1
-                    keys.add(newIndex, key)
-                    meetups.add(newIndex, meetup)
-                    notifyDataSetChanged()
-                }
-            }
-
-            override fun onChildAdded(snapshot: DataSnapshot?, prevKey: String?) {
-                if (snapshot == null) return
-                val key = snapshot.key
-                val meetup = snapshot.getValue(Meetup::class.java)
-
-                addAttendees(meetup, snapshot)
-                keys.add(key)
-                meetups.add(meetup)
-                notifyDataSetChanged()
-                listener.onAdded()
-            }
-
-            override fun onCancelled(snapshot: FirebaseError?) {
-            }
-
-            private fun addAttendees(meetup: Meetup, snapshot: DataSnapshot) {
-                snapshot.child("attendees").children.forEach {
-                    meetup.attendees.add(it.getValue(Attendee::class.java))
-                }
-            }
-        }
-    }
-
-    fun setUser(user: Attendee?) {
-        this.user = user
-        notifyDataSetChanged()
-    }
-
-    override fun onSuccess(beacons: ArrayList<Beacon>) {
-        meetups.forEachIndexed { i, meetup ->
-            val nearest = containsHashcode(beacons, meetup.hashcode)
-            if (meetup.nearest != nearest) {
-                meetup.nearest = nearest
-                notifyItemChanged(i)
-            }
-        }
-    }
-
-    private fun containsHashcode(beacons: ArrayList<Beacon>, hashcode: String): Boolean {
-        for (beacon in beacons) {
-            // Log.e("yeobara", "${beacon.deviceAddress}: ${beacon.rssi}")
-            val url = beacon.urlStatus.url()
-            if (url.endsWith(hashcode)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    override fun onFailure(message: String, deviceAddress: String?) {
-    }
-
-    fun startEddyStone() {
-        eddystone.stop()
-        eddystone.start()
-    }
-
-    fun stopEddyStone() {
-        eddystone.stop()
     }
 }
 
