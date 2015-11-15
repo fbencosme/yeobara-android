@@ -17,9 +17,9 @@ import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.tbruyelle.rxpermissions.RxPermissions
 import io.github.importre.eddystone.EddyStone
-import io.github.yeobara.android.meetup.Attendee
 import io.github.yeobara.android.meetup.MeetupAdapter
 import io.github.yeobara.android.meetup.UpdateListener
+import io.github.yeobara.android.meetup.User
 import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.NetworkUtils
 import io.github.yeobara.android.utils.UiUtils
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), UpdateListener {
     }
 
     private val userRef: Firebase by lazy {
-        Firebase("https://yeobara.firebaseio.com/users")
+        Firebase("${Const.FB_BASE}/users")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +66,9 @@ class MainActivity : AppCompatActivity(), UpdateListener {
     private fun initUser() {
         val id = AppUtils.getFingerprint()
         userRef.child(id).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(p0: DataSnapshot?) {
-                if (p0 != null) {
-                    val value = p0.value
+            override fun onDataChange(data: DataSnapshot?) {
+                if (data != null) {
+                    val value = data.value
                     if (value == null) {
                         adapter.setUser(null)
                         try {
@@ -76,13 +76,13 @@ class MainActivity : AppCompatActivity(), UpdateListener {
                         } catch (e: Exception) {
                         }
                     } else {
-                        val user = p0.getValue(Attendee::class.java)
+                        val user = data.getValue(User::class.java)
                         adapter.setUser(user)
                     }
                 }
             }
 
-            override fun onCancelled(p0: FirebaseError?) {
+            override fun onCancelled(error: FirebaseError?) {
                 adapter.setUser(null)
             }
         })
@@ -95,17 +95,14 @@ class MainActivity : AppCompatActivity(), UpdateListener {
                 .setTitle(R.string.dialog_title_signup)
                 .setIcon(R.mipmap.ic_launcher)
                 .setView(view)
-                .setNegativeButton(android.R.string.cancel, { dialog, which ->
-                })
                 .setPositiveButton(android.R.string.ok, { dialog, which ->
                     nicknameView.text?.toString()?.let {
                         if (it.isNotEmpty()) {
-                            val attendee = Attendee(id, System.currentTimeMillis(), it, "")
+                            val attendee = User(id, it)
                             userRef.child(id).setValue(attendee)
                         }
                     }
                 })
-                .setCancelable(false)
                 .show()
     }
 

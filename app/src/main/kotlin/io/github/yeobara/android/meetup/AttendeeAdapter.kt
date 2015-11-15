@@ -6,6 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import com.firebase.client.DataSnapshot
+import com.firebase.client.Firebase
+import com.firebase.client.FirebaseError
+import com.firebase.client.ValueEventListener
+import io.github.yeobara.android.Const
 import io.github.yeobara.android.R
 import java.util.*
 
@@ -14,6 +19,10 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
 
     companion object {
         val LAYOUT = R.layout.layout_two_line
+    }
+
+    private val userRef: Firebase by lazy {
+        Firebase("${Const.FB_BASE}/users")
     }
 
     override fun getCount(): Int = attendees.size
@@ -41,8 +50,19 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
         }
 
         val item = getItem(position)
-        title.text = item.nickname
-        subtitle.text = item.status
+        userRef.child(item.userId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(data: DataSnapshot?) {
+                data?.let {
+                    it.getValue(User::class.java)?.let { user ->
+                        title.text = user.nickname
+                        subtitle.text = item.status
+                    }
+                }
+            }
+
+            override fun onCancelled(error: FirebaseError?) {
+            }
+        })
         return view
     }
 }

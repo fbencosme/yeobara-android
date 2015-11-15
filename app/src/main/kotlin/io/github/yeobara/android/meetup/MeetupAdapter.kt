@@ -2,7 +2,6 @@ package io.github.yeobara.android.meetup
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
@@ -10,11 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
-import android.widget.Toast
 import com.firebase.client.*
 import io.github.importre.eddystone.Beacon
 import io.github.importre.eddystone.EddyStone
 import io.github.importre.eddystone.EddyStoneCallback
+import io.github.yeobara.android.Const
 import io.github.yeobara.android.R
 import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.StringUtils
@@ -27,13 +26,13 @@ public class MeetupAdapter(val activity: Activity,
     public val keys: ArrayList<String> = arrayListOf()
     public val meetups: ArrayList<Meetup> = arrayListOf()
 
-    private var user: Attendee? = null
+    private var user: User? = null
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
     private val eddystone: EddyStone
 
     private val meetupsRef: Firebase by lazy {
-        Firebase("https://yeobara.firebaseio.com/meetups")
+        Firebase("${Const.FB_BASE}/meetups")
     }
 
     private val query: Query by lazy {
@@ -148,7 +147,7 @@ public class MeetupAdapter(val activity: Activity,
         }
     }
 
-    fun setUser(user: Attendee?) {
+    fun setUser(user: User?) {
         this.user = user
         notifyDataSetChanged()
     }
@@ -202,12 +201,7 @@ public class MeetupAdapter(val activity: Activity,
                 val attendeeAdapter = AttendeeAdapter(activity, meetup.attendees)
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.dialog_title_attendees)
-                        .setAdapter(attendeeAdapter, object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-                                val nickname = meetup.attendees[which].nickname
-                                Toast.makeText(activity, nickname, Toast.LENGTH_SHORT).show()
-                            }
-                        })
+                        .setAdapter(attendeeAdapter, null)
                         .show()
             }
         }
@@ -215,17 +209,17 @@ public class MeetupAdapter(val activity: Activity,
         private fun initCheckBoxButtons(key: String, meetup: Meetup) {
             val rvsp = view.getTag(R.id.rvsp) as CheckBox
             rvsp.isEnabled = user != null
-            setCheckListener(key, rvsp, "rvsp")
+            setCheckListener(key, rvsp, Const.RVSP)
 
             val checkin = view.getTag(R.id.checkin) as CheckBox
-            setCheckListener(key, checkin, "checkin")
+            setCheckListener(key, checkin, Const.CHECK_IN)
 
             meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(p0: DataSnapshot?) {
-                            rvsp.isChecked = p0?.value != null
-                            p0?.getValue(Attendee::class.java)?.let { attendee ->
-                                checkin.isChecked = "checkin".equals(attendee.status)
+                        override fun onDataChange(data: DataSnapshot?) {
+                            rvsp.isChecked = data?.value != null
+                            data?.getValue(Attendee::class.java)?.let { attendee ->
+                                checkin.isChecked = Const.CHECK_IN.equals(attendee.status)
                             }
 
                             checkin.visibility = if (meetup.nearest && rvsp.isChecked) {
@@ -235,7 +229,7 @@ public class MeetupAdapter(val activity: Activity,
                             }
                         }
 
-                        override fun onCancelled(p0: FirebaseError?) {
+                        override fun onCancelled(error: FirebaseError?) {
                         }
                     })
         }
@@ -263,18 +257,16 @@ public class MeetupAdapter(val activity: Activity,
             toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
         }
 
-        private fun setCheckListener(key: String, cb: CheckBox, status: String) {
+        private fun setCheckListener(key: String, cb: CheckBox, currentStatus: String) {
             cb.setOnCheckedChangeListener { button, checked ->
-                user?.let {
-                    if (button.isPressed) {
-                        it.status = if (checked) status
-                        else if (status.equals("checkin")) "rvsp"
-                        else ""
+                if (button.isPressed) {
+                    val status = if (checked) currentStatus
+                    else if (currentStatus.equals(Const.CHECK_IN)) Const.RVSP
+                    else null
 
-                        val id = AppUtils.getFingerprint()
-                        val attendee = if (it.status.isNotEmpty()) it else null
-                        meetupsRef.child("$key/attendees/$id").setValue(attendee)
-                    }
+                    val id = AppUtils.getFingerprint()
+                    val attendee = if (status != null) Attendee(id, status) else null
+                    meetupsRef.child("$key/attendees/$id").setValue(attendee)
                 }
             }
         }

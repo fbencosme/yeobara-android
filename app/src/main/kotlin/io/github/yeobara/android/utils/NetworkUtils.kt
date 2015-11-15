@@ -14,6 +14,6 @@ public object NetworkUtils {
 
     public fun getBluetoothMacAddress(): String {
         val adapter = BluetoothAdapter.getDefaultAdapter();
-        return adapter?.address ?: "noaddress"
+        return adapter?.address ?: throw RuntimeException("unsupported device")
     }
 }
