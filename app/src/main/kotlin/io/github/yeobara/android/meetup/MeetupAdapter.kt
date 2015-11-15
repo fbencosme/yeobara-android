@@ -23,6 +23,7 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
     public val keys: ArrayList<String> = arrayListOf()
     public val meetups: ArrayList<Meetup> = arrayListOf()
 
+    private var user: Attendee? = null
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
 
@@ -31,7 +32,7 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
     }
 
     private val query: Query by lazy {
-        meetupsRef.orderByChild("date")
+        meetupsRef.orderByChild("created")
     }
 
     init {
@@ -84,20 +85,18 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
             val descriptionView = view.getTag(R.id.description) as TextView
             descriptionView.text = meetup.description
 
-            val fingerprint = AppUtils.getFingerprint()
             val rvsp = view.getTag(R.id.rvsp) as CheckBox
-            rvsp.isChecked = meetup.attendees.sumBy {
-                if (it.fingerprint.equals(fingerprint)) 1 else 0
-            } == 1
-            rvsp.setOnCheckedChangeListener { button, checked ->
-                val attendee = if (checked) {
-                    Attendee(fingerprint, System.currentTimeMillis(), "test", "rvsp")
-                } else {
-                    null
-                }
-                val map = hashMapOf(Pair(fingerprint, attendee))
-                meetupsRef.child("$key/attendees").setValue(map)
-            }
+            rvsp.isEnabled = user != null
+            setRvspCheckListener(key, rvsp)
+            meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(p0: DataSnapshot?) {
+                            rvsp.isChecked = p0?.exists() ?: false
+                        }
+
+                        override fun onCancelled(p0: FirebaseError?) {
+                        }
+                    })
 
             val attendeeCount = view.getTag(R.id.attendees_count) as TextView
             attendeeCount.text = meetup.attendees.size.toString()
@@ -116,6 +115,17 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                         .show()
             }
         }
+
+        private fun setRvspCheckListener(key: String, rvsp: CheckBox) {
+            rvsp.setOnCheckedChangeListener { button, checked ->
+                user?.let {
+                    it.status = if (checked) "rvsp" else ""
+                    val id = AppUtils.getFingerprint()
+                    val map = hashMapOf(Pair(id, if (checked) it else null))
+                    meetupsRef.child("$key/attendees").setValue(map)
+                }
+            }
+        }
     }
 
     private fun initChildEventListener(): ChildEventListener {
@@ -125,14 +135,11 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                 val key = snapshot.key
                 val index = keys.indexOf(key)
 
-                if (index >= 0) {
+                if (index >= 0 && meetups.size > index) {
                     keys.removeAt(index)
                     meetups.removeAt(index)
                     notifyDataSetChanged()
                 }
-            }
-
-            override fun onCancelled(snapshot: FirebaseError?) {
             }
 
             override fun onChildChanged(snapshot: DataSnapshot?, prevKey: String?) {
@@ -141,9 +148,11 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                 val meetup = snapshot.getValue(Meetup::class.java)
                 val index = keys.indexOf(key)
 
-                addAttendees(meetup, snapshot)
-                meetups.set(index, meetup)
-                notifyDataSetChanged()
+                if (index >= 0 && meetups.size > index) {
+                    addAttendees(meetup, snapshot)
+                    meetups.set(index, meetup)
+                    notifyItemChanged(index)
+                }
             }
 
             override fun onChildMoved(snapshot: DataSnapshot?, prevKey: String?) {
@@ -152,10 +161,15 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                 val meetup = snapshot.getValue(Meetup::class.java)
                 val index = keys.indexOf(key)
 
-                addAttendees(meetup, snapshot)
-                keys.removeAt(index)
-                meetups.removeAt(index)
-                notifyDataSetChanged()
+                if (index >= 0 && meetups.size > index) {
+                    addAttendees(meetup, snapshot)
+                    keys.removeAt(index)
+                    meetups.removeAt(index)
+                    val newIndex = if (prevKey == null) 0 else index + 1
+                    keys.add(newIndex, key)
+                    meetups.add(newIndex, meetup)
+                    notifyDataSetChanged()
+                }
             }
 
             override fun onChildAdded(snapshot: DataSnapshot?, prevKey: String?) {
@@ -164,27 +178,13 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                 val meetup = snapshot.getValue(Meetup::class.java)
 
                 addAttendees(meetup, snapshot)
-                update(key, meetup, prevKey)
+                keys.add(key)
+                meetups.add(meetup)
+                notifyDataSetChanged()
                 listener.onAdded()
             }
 
-            private fun update(key: String, meetup: Meetup, prevKey: String?) {
-                if (prevKey == null) {
-                    keys.add(key)
-                    meetups.add(meetup)
-                    notifyDataSetChanged()
-                } else {
-                    val prevIndex = keys.indexOf(prevKey)
-                    val nextIndex = prevIndex + 1
-                    if (nextIndex == keys.size) {
-                        keys.add(key)
-                        meetups.add(meetup)
-                    } else {
-                        keys.add(nextIndex, key)
-                        meetups.add(nextIndex, meetup)
-                    }
-                    notifyDataSetChanged()
-                }
+            override fun onCancelled(snapshot: FirebaseError?) {
             }
 
             private fun addAttendees(meetup: Meetup, snapshot: DataSnapshot) {
@@ -193,6 +193,11 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
                 }
             }
         }
+    }
+
+    fun setUser(user: Attendee?) {
+        this.user = user
+        notifyDataSetChanged()
     }
 }
 
