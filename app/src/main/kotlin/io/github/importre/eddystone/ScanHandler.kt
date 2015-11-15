@@ -80,7 +80,7 @@ internal class ScanHandler(val eddyStoneCallback: EddyStoneCallback) : ScanCallb
 
     private fun newLostObserver(): Observable<Long> {
         return Observable
-                .interval(3, TimeUnit.SECONDS)
+                .interval(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
     }

@@ -91,25 +91,22 @@
                     tools:text="10" />
             </LinearLayout>
 
-            <ViewSwitcher
-                android:id="@+id/switcher"
+            <CheckBox
+                android:id="@+id/rvsp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true">
+                android:layout_centerVertical="true"
+                android:text="@string/rvsp" />
 
-                <CheckBox
-                    android:id="@+id/rvsp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/rvsp" />
-
-                <CheckBox
-                    android:id="@+id/checkin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/checkin" />
-            </ViewSwitcher>
+            <CheckBox
+                android:id="@+id/checkin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/space_between_content_area"
+                android:layout_toEndOf="@id/rvsp"
+                android:text="@string/checkin" />
 
         </RelativeLayout>
     </LinearLayout>

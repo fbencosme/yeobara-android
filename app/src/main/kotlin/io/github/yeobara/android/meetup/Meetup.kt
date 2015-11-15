@@ -13,4 +13,5 @@ public class Meetup() {
     val friendlyName: String = ""
     val hashcode: String = ""
     val host: String = ""
+    var nearest: Boolean = false
 }

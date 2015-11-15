@@ -1,8 +1,8 @@
 package io.github.yeobara.android.meetup
 
-import android.content.Context
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.DialogInterface
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
@@ -12,13 +12,17 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import com.firebase.client.*
+import io.github.importre.eddystone.Beacon
+import io.github.importre.eddystone.EddyStone
+import io.github.importre.eddystone.EddyStoneCallback
 import io.github.yeobara.android.R
 import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.StringUtils
 import java.util.*
 
-public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
-        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+public class MeetupAdapter(val activity: Activity,
+                           val listener: UpdateListener) :
+        RecyclerView.Adapter<RecyclerView.ViewHolder>(), EddyStoneCallback {
 
     public val keys: ArrayList<String> = arrayListOf()
     public val meetups: ArrayList<Meetup> = arrayListOf()
@@ -26,6 +30,7 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
     private var user: Attendee? = null
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
+    private val eddystone: EddyStone
 
     private val meetupsRef: Firebase by lazy {
         Firebase("https://yeobara.firebaseio.com/meetups")
@@ -38,12 +43,15 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
     init {
         childEventListener = initChildEventListener()
         eventListener = query.addChildEventListener(childEventListener)
+        eddystone = EddyStone(activity, this)
+        eddystone.start()
     }
 
     public fun clear() {
         keys.clear()
         meetups.clear()
         query.removeEventListener(eventListener)
+        eddystone.stop()
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
@@ -75,54 +83,89 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
 
     inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {
         fun setItem(key: String, meetup: Meetup) {
-            val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
-            toolbar.title = meetup.friendlyName
-            toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
+            initToolbar(meetup)
+            initContents(meetup)
+            initCheckBoxButtons(key, meetup)
+            initAttendeesButton(meetup)
+        }
 
-            val dateView = view.getTag(R.id.date) as TextView
-            dateView.text = meetup.date
-
-            val descriptionView = view.getTag(R.id.description) as TextView
-            descriptionView.text = meetup.description
-
-            val rvsp = view.getTag(R.id.rvsp) as CheckBox
-            rvsp.isEnabled = user != null
-            setRvspCheckListener(key, rvsp)
-            meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(p0: DataSnapshot?) {
-                            rvsp.isChecked = p0?.exists() ?: false
-                        }
-
-                        override fun onCancelled(p0: FirebaseError?) {
-                        }
-                    })
-
+        private fun initAttendeesButton(meetup: Meetup) {
             val attendeeCount = view.getTag(R.id.attendees_count) as TextView
             attendeeCount.text = meetup.attendees.size.toString()
 
             val attendees = view.getTag(R.id.attendees) as View
             attendees.setOnClickListener {
-                val attendeeAdapter = AttendeeAdapter(context, meetup.attendees)
-                AlertDialog.Builder(context)
+                val attendeeAdapter = AttendeeAdapter(activity, meetup.attendees)
+                AlertDialog.Builder(activity)
                         .setTitle(R.string.dialog_title_attendees)
                         .setAdapter(attendeeAdapter, object : DialogInterface.OnClickListener {
                             override fun onClick(dialog: DialogInterface?, which: Int) {
                                 val nickname = meetup.attendees[which].nickname
-                                Toast.makeText(context, nickname, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(activity, nickname, Toast.LENGTH_SHORT).show()
                             }
                         })
                         .show()
             }
         }
 
-        private fun setRvspCheckListener(key: String, rvsp: CheckBox) {
-            rvsp.setOnCheckedChangeListener { button, checked ->
+        private fun initCheckBoxButtons(key: String, meetup: Meetup) {
+            val rvsp = view.getTag(R.id.rvsp) as CheckBox
+            rvsp.isEnabled = user != null
+            setCheckListener(key, rvsp, "rvsp")
+
+            val checkin = view.getTag(R.id.checkin) as CheckBox
+            checkin.visibility = View.GONE
+            setCheckListener(key, checkin, "checkin")
+
+            meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(p0: DataSnapshot?) {
+                            rvsp.isChecked = p0?.value != null
+                            checkin.visibility = if (rvsp.isChecked) View.VISIBLE else View.GONE
+                            p0?.getValue(Attendee::class.java)?.let { attendee ->
+                                checkin.isChecked = "checkin".equals(attendee.status)
+                            }
+
+                            checkin.visibility = if (meetup.nearest && rvsp.isChecked) {
+                                View.VISIBLE
+                            } else {
+                                View.GONE
+                            }
+                        }
+
+                        override fun onCancelled(p0: FirebaseError?) {
+                        }
+                    })
+        }
+
+        private fun initContents(meetup: Meetup) {
+            val dateView = view.getTag(R.id.date) as TextView
+            dateView.text = meetup.date
+
+            val descriptionView = view.getTag(R.id.description) as TextView
+            descriptionView.text = meetup.description
+        }
+
+        private fun initToolbar(meetup: Meetup) {
+            val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
+            val nearest = if (meetup.nearest) " *" else ""
+            toolbar.title = "${meetup.friendlyName}$nearest"
+            toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
+        }
+
+        private fun setCheckListener(key: String, cb: CheckBox, status: String) {
+            cb.setOnCheckedChangeListener { button, checked ->
                 user?.let {
-                    it.status = if (checked) "rvsp" else ""
-                    val id = AppUtils.getFingerprint()
-                    val map = hashMapOf(Pair(id, if (checked) it else null))
-                    meetupsRef.child("$key/attendees").setValue(map)
+                    if (button.isPressed) {
+                        it.status = if (checked) status
+                        else if (status.equals("checkin")) "rvsp"
+                        else ""
+
+                        val id = AppUtils.getFingerprint()
+                        val attendee = if (it.status.isNotEmpty()) it else null
+                        val map = hashMapOf(Pair(id, attendee))
+                        meetupsRef.child("$key/attendees").setValue(map)
+                    }
                 }
             }
         }
@@ -198,6 +241,39 @@ public class MeetupAdapter(val context: Context, val listener: UpdateListener) :
     fun setUser(user: Attendee?) {
         this.user = user
         notifyDataSetChanged()
+    }
+
+    override fun onSuccess(beacons: ArrayList<Beacon>) {
+        meetups.forEachIndexed { i, meetup ->
+            val nearest = containsHashcode(beacons, meetup.hashcode)
+            if (meetup.nearest != nearest) {
+                meetup.nearest = nearest
+                notifyItemChanged(i)
+            }
+        }
+    }
+
+    private fun containsHashcode(beacons: ArrayList<Beacon>, hashcode: String): Boolean {
+        for (beacon in beacons) {
+            // Log.e("yeobara", "${beacon.deviceAddress}: ${beacon.rssi}")
+            val url = beacon.urlStatus.url()
+            if (url.endsWith(hashcode)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun onFailure(message: String, deviceAddress: String?) {
+    }
+
+    fun startEddyStone() {
+        eddystone.stop()
+        eddystone.start()
+    }
+
+    fun stopEddyStone() {
+        eddystone.stop()
     }
 }
 

@@ -54,16 +54,22 @@ public class EddyStone(activity: Activity, val cb: EddyStoneCallback) {
     }
 
     public fun start() {
-        scanner?.let {
-            it.startScan(scanFilterList, settings, scanHandler)
-            scanHandler.start()
+        try {
+            scanner?.let {
+                it.startScan(scanFilterList, settings, scanHandler)
+                scanHandler.start()
+            }
+        } catch (e: Exception) {
         }
     }
 
     public fun stop() {
-        scanner?.let {
-            it.stopScan(scanHandler)
-            scanHandler.stop()
+        try {
+            scanner?.let {
+                it.stopScan(scanHandler)
+                scanHandler.stop()
+            }
+        } catch (e: Exception) {
         }
     }
 }
