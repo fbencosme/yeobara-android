@@ -124,6 +124,7 @@ class SignInActivity : AppCompatActivity() {
                 if (error != null) {
                     val msg = "${error.message} : ${error.details}"
                     Toast.makeText(applicationContext, msg, Toast.LENGTH_LONG).show()
+                    clearToken(accessToken)
                 }
                 showProgress(false)
             }
@@ -138,6 +139,17 @@ class SignInActivity : AppCompatActivity() {
                 }
             }
         });
+    }
+
+    private fun clearToken(accessToken: String) {
+        PrefUtils.clearAll(this)
+        Observable.just(accessToken)
+                .map({ token ->
+                    GoogleAuthUtil.clearToken(this, token)
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
     }
 
     private fun saveToken(accessToken: String) {
@@ -172,6 +184,8 @@ class SignInActivity : AppCompatActivity() {
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // nothing
             }
+        } else if (Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR == requestCode) {
+            signIn()
         }
     }
 }
