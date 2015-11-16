@@ -11,11 +11,10 @@ import android.content.Intent
 import android.os.ParcelUuid
 import java.util.*
 
-public class EddyStone(activity: Activity, val cb: EddyStoneCallback) {
+public class EddyStone(activity: Activity, val cb: EddyStoneCallback, val requestCodeForBT: Int) {
 
     companion object {
         public val UUID: ParcelUuid = ParcelUuid.fromString("0000FEAA-0000-1000-8000-00805F9B34FB")
-        public val REQUEST_ENABLE_BLUETOOTH: Int = 100
     }
 
     private val scanFilterList: ArrayList<ScanFilter> = arrayListOf()
@@ -33,15 +32,15 @@ public class EddyStone(activity: Activity, val cb: EddyStoneCallback) {
         val ctx = activity.applicationContext
         val blManager = ctx.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         blManager.adapter?.let {
-            initScanner(activity, it)
+            initScanner(activity, it, requestCodeForBT)
             initScanFilter()
         }
     }
 
-    private fun initScanner(activity: Activity, btAdapter: BluetoothAdapter) {
+    private fun initScanner(activity: Activity, btAdapter: BluetoothAdapter, requestCode: Int) {
         if (!btAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH)
+            activity.startActivityForResult(enableBtIntent, requestCode)
         } else {
             scanner = btAdapter.bluetoothLeScanner
         }

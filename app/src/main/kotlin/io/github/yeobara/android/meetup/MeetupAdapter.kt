@@ -15,7 +15,6 @@ import io.github.importre.eddystone.EddyStone
 import io.github.importre.eddystone.EddyStoneCallback
 import io.github.yeobara.android.Const
 import io.github.yeobara.android.R
-import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.StringUtils
 import java.util.*
 
@@ -42,7 +41,7 @@ public class MeetupAdapter(val activity: Activity,
     init {
         childEventListener = initChildEventListener()
         eventListener = query.addChildEventListener(childEventListener)
-        eddystone = EddyStone(activity, this)
+        eddystone = EddyStone(activity, this, Const.REQUEST_ENABLE_BLUETOOTH)
         eddystone.start()
     }
 
@@ -86,6 +85,7 @@ public class MeetupAdapter(val activity: Activity,
                 if (snapshot == null) return
                 val key = snapshot.key
                 val index = keys.indexOf(key)
+                listener.onUpdate()
 
                 if (index >= 0 && meetups.size > index) {
                     keys.removeAt(index)
@@ -99,6 +99,7 @@ public class MeetupAdapter(val activity: Activity,
                 val key = snapshot.key
                 val meetup = snapshot.getValue(Meetup::class.java)
                 val index = keys.indexOf(key)
+                listener.onUpdate()
 
                 if (index >= 0 && meetups.size > index) {
                     addAttendees(meetup, snapshot)
@@ -112,6 +113,7 @@ public class MeetupAdapter(val activity: Activity,
                 val key = snapshot.key
                 val meetup = snapshot.getValue(Meetup::class.java)
                 val index = keys.indexOf(key)
+                listener.onUpdate()
 
                 if (index >= 0 && meetups.size > index) {
                     addAttendees(meetup, snapshot)
@@ -133,10 +135,11 @@ public class MeetupAdapter(val activity: Activity,
                 keys.add(key)
                 meetups.add(meetup)
                 notifyDataSetChanged()
-                listener.onAdded()
+                listener.onUpdate()
             }
 
             override fun onCancelled(snapshot: FirebaseError?) {
+                listener.onUpdate()
             }
 
             private fun addAttendees(meetup: Meetup, snapshot: DataSnapshot) {
@@ -214,7 +217,8 @@ public class MeetupAdapter(val activity: Activity,
             val checkin = view.getTag(R.id.checkin) as CheckBox
             setCheckListener(key, checkin, Const.CHECK_IN)
 
-            meetupsRef.child("$key/attendees/${AppUtils.getFingerprint()}")
+            val uid = meetupsRef.auth.uid ?: return
+            meetupsRef.child("$key/attendees/$uid")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(data: DataSnapshot?) {
                             rvsp.isChecked = data?.value != null
@@ -264,9 +268,10 @@ public class MeetupAdapter(val activity: Activity,
                     else if (currentStatus.equals(Const.CHECK_IN)) Const.RVSP
                     else null
 
-                    val id = AppUtils.getFingerprint()
-                    val attendee = if (status != null) Attendee(id, status) else null
-                    meetupsRef.child("$key/attendees/$id").setValue(attendee)
+                    meetupsRef.auth.uid?.let { id ->
+                        val attendee = if (status != null) Attendee(id, status) else null
+                        meetupsRef.child("$key/attendees/$id").setValue(attendee)
+                    }
                 }
             }
         }

@@ -6,21 +6,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.StaggeredGridLayoutManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.widget.EditText
 import com.firebase.client.DataSnapshot
 import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.tbruyelle.rxpermissions.RxPermissions
-import io.github.importre.eddystone.EddyStone
 import io.github.yeobara.android.meetup.MeetupAdapter
 import io.github.yeobara.android.meetup.UpdateListener
 import io.github.yeobara.android.meetup.User
-import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.NetworkUtils
 import io.github.yeobara.android.utils.UiUtils
 import kotlinx.android.synthetic.activity_main.coordLayout
@@ -28,7 +26,7 @@ import kotlinx.android.synthetic.activity_main.progress
 import kotlinx.android.synthetic.activity_main.toolbar
 import kotlinx.android.synthetic.content_main.recyclerView
 
-class MainActivity : AppCompatActivity(), UpdateListener {
+class MeetupActivity : AppCompatActivity(), UpdateListener {
 
     private val adapter: MeetupAdapter by lazy {
         MeetupAdapter(this, this)
@@ -40,7 +38,6 @@ class MainActivity : AppCompatActivity(), UpdateListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         checkPermission()
@@ -63,47 +60,57 @@ class MainActivity : AppCompatActivity(), UpdateListener {
         adapter.clear()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_meetup, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.action_settings -> startSettingsActivity()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun startSettingsActivity() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivityForResult(intent, Const.REQUEST_SETTINGS)
+    }
+
     private fun initUser() {
-        val id = AppUtils.getFingerprint()
-        userRef.child(id).addValueEventListener(object : ValueEventListener {
+        val auth = userRef.auth ?: return
+        val uid = auth.uid ?: return
+        val providerData = auth.providerData ?: return
+
+        userRef.child(uid).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(data: DataSnapshot?) {
                 if (data != null) {
                     val value = data.value
                     if (value == null) {
-                        adapter.setUser(null)
-                        try {
-                            showSignUpDialog(id)
-                        } catch (e: Exception) {
-                        }
+                        val nickname = providerData["displayName"]?.toString() ?: return
+                        val email = providerData["email"]?.toString() ?: return
+                        val profile = providerData["profileImageURL"]?.toString()
+                        val user = User(uid, nickname, email, profile)
+                        userRef.child(uid).setValue(user)
+                        setUser(null)
                     } else {
                         val user = data.getValue(User::class.java)
-                        adapter.setUser(user)
+                        setUser(user)
                     }
                 }
             }
 
+            private fun setUser(user: User?) {
+                adapter.setUser(user)
+                if (user != null) {
+                    toolbar.subtitle = "${user.nickname} · ${user.email}"
+                }
+            }
+
             override fun onCancelled(error: FirebaseError?) {
-                adapter.setUser(null)
+                setUser(null)
             }
         })
-    }
-
-    private fun showSignUpDialog(id: String) {
-        val view = layoutInflater.inflate(R.layout.dialog_signup, null)
-        val nicknameView = view.findViewById(R.id.nickname) as EditText
-        AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_signup)
-                .setIcon(R.mipmap.ic_launcher)
-                .setView(view)
-                .setPositiveButton(android.R.string.ok, { dialog, which ->
-                    nicknameView.text?.toString()?.let {
-                        if (it.isNotEmpty()) {
-                            val attendee = User(id, it)
-                            userRef.child(id).setValue(attendee)
-                        }
-                    }
-                })
-                .show()
     }
 
     private fun initMeetups() {
@@ -118,7 +125,7 @@ class MainActivity : AppCompatActivity(), UpdateListener {
         recyclerView.adapter = adapter
     }
 
-    override fun onAdded() {
+    override fun onUpdate() {
         progress.visibility = View.GONE
     }
 
@@ -146,9 +153,15 @@ class MainActivity : AppCompatActivity(), UpdateListener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (EddyStone.REQUEST_ENABLE_BLUETOOTH == requestCode &&
-                Activity.RESULT_OK == resultCode) {
-            adapter.startEddyStone()
+        if (Activity.RESULT_OK == resultCode) {
+            when (requestCode) {
+                Const.REQUEST_ENABLE_BLUETOOTH -> {
+                    adapter.startEddyStone()
+                }
+                Const.REQUEST_SETTINGS -> {
+                    finish()
+                }
+            }
         }
     }
 }
