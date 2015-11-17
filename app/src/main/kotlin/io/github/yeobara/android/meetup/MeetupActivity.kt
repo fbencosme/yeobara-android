@@ -1,4 +1,4 @@
-package io.github.yeobara.android
+package io.github.yeobara.android.meetup
 
 import android.Manifest
 import android.app.Activity
@@ -16,9 +16,9 @@ import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.tbruyelle.rxpermissions.RxPermissions
-import io.github.yeobara.android.meetup.MeetupAdapter
-import io.github.yeobara.android.meetup.UpdateListener
-import io.github.yeobara.android.meetup.User
+import io.github.yeobara.android.R
+import io.github.yeobara.android.app.Const
+import io.github.yeobara.android.setting.SettingsActivity
 import io.github.yeobara.android.utils.NetworkUtils
 import io.github.yeobara.android.utils.UiUtils
 import kotlinx.android.synthetic.activity_main.coordLayout
@@ -40,8 +40,13 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        checkPermission()
-        initMeetups()
+
+        if (userRef.auth == null) {
+            finish()
+        } else {
+            checkPermission()
+            initMeetups()
+        }
     }
 
     override fun onStart() {
@@ -85,25 +90,8 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         userRef.child(uid).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(data: DataSnapshot?) {
                 if (data != null) {
-                    val value = data.value
-                    if (value == null) {
-                        val nickname = providerData["displayName"]?.toString() ?: return
-                        val email = providerData["email"]?.toString() ?: return
-                        val profile = providerData["profileImageURL"]?.toString()
-                        val user = User(uid, nickname, email, profile)
-                        userRef.child(uid).setValue(user)
-                        setUser(null)
-                    } else {
-                        val user = data.getValue(User::class.java)
-                        setUser(user)
-                    }
-                }
-            }
-
-            private fun setUser(user: User?) {
-                adapter.setUser(user)
-                if (user != null) {
-                    toolbar.subtitle = "${user.nickname} · ${user.email}"
+                    val user = getUser(data, uid, providerData)
+                    setUser(user)
                 }
             }
 
@@ -113,9 +101,34 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         })
     }
 
+    private fun getUser(snapshot: DataSnapshot,
+                        uid: String, providerData:
+                        Map<String, Any>): User? {
+        val value = snapshot.value
+        return if (value == null) {
+            val nickname = providerData["displayName"]?.toString() ?: return null
+            val email = providerData["email"]?.toString() ?: return null
+            val profile = providerData["profileImageURL"]?.toString()
+            val user = User(uid, nickname, email, profile)
+            userRef.child(uid).setValue(user)
+            user
+        } else {
+            snapshot.getValue(User::class.java)
+        }
+    }
+
+    private fun setUser(user: User?) {
+        adapter.setUser(user)
+        if (user != null) {
+            toolbar.subtitle = "${user.nickname} · ${user.email}"
+        }
+    }
+
     private fun initMeetups() {
         val span = if (UiUtils.isLandscape(this)) 2 else 1
-        val layoutManager = StaggeredGridLayoutManager(span, StaggeredGridLayoutManager.VERTICAL)
+        val layoutManager = StaggeredGridLayoutManager(
+                span, StaggeredGridLayoutManager.VERTICAL)
+
         recyclerView.layoutManager = layoutManager
         progress.visibility = if (NetworkUtils.isNetworkConnected(this)) {
             View.VISIBLE
@@ -140,7 +153,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
                         showSnackbar(message)
                     }
                 }, { error ->
-                    showSnackbar(error.message ?: "error")
+                    showSnackbar(error.message ?: "permission error")
                 })
     }
 

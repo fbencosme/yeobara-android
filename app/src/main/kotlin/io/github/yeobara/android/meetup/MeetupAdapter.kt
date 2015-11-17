@@ -13,8 +13,8 @@ import com.firebase.client.*
 import io.github.importre.eddystone.Beacon
 import io.github.importre.eddystone.EddyStone
 import io.github.importre.eddystone.EddyStoneCallback
-import io.github.yeobara.android.Const
 import io.github.yeobara.android.R
+import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.utils.StringUtils
 import java.util.*
 

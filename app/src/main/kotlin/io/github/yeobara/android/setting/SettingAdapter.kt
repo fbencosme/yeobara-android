@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import io.github.yeobara.android.BuildConfig
 import io.github.yeobara.android.R
-import io.github.yeobara.android.SignInActivity
+import io.github.yeobara.android.sign.SignInActivity
 import io.github.yeobara.android.utils.PrefUtils
 
 public class SettingAdapter(val activity: Activity) :

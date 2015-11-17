@@ -1,4 +1,4 @@
-package io.github.yeobara.android
+package io.github.yeobara.android.sign
 
 import android.accounts.Account
 import android.accounts.AccountManager
@@ -17,6 +17,9 @@ import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.common.AccountPicker
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import io.github.yeobara.android.R
+import io.github.yeobara.android.app.Const
+import io.github.yeobara.android.meetup.MeetupActivity
 import io.github.yeobara.android.utils.PrefUtils
 import kotlinx.android.synthetic.activity_signin.progress
 import kotlinx.android.synthetic.activity_signin.signin
@@ -73,29 +76,32 @@ class SignInActivity : AppCompatActivity() {
                     val account = Account(mail, "com.google")
                     GoogleAuthUtil.getToken(this, account, SCOPE)
                 })
-                .filter {
-                    it != null
-                }
+                .filter { it != null }
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ token ->
                     loginGooglePlus(token)
                 }, { error ->
-                    showProgress(false)
-                    val api = GoogleApiAvailability.getInstance();
-                    if (error is GooglePlayServicesAvailabilityException) {
-                        val statusCode = error.connectionStatusCode
-                        val dialog = api.getErrorDialog(this, statusCode,
-                                Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR)
-                        dialog.show()
-                    } else if (error is UserRecoverableAuthException) {
-                        val intent = error.intent
-                        startActivityForResult(intent,
-                                Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR)
-                    } else {
-                        error.printStackTrace()
-                    }
+                    handleErrorOfSignIn(error)
                 })
+    }
+
+    private fun handleErrorOfSignIn(error: Throwable?) {
+        showProgress(false)
+        if (error == null) return
+        val api = GoogleApiAvailability.getInstance()
+        if (error is GooglePlayServicesAvailabilityException) {
+            val statusCode = error.connectionStatusCode
+            val dialog = api.getErrorDialog(this, statusCode,
+                    Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR)
+            dialog.show()
+        } else if (error is UserRecoverableAuthException) {
+            val intent = error.intent
+            startActivityForResult(intent,
+                    Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR)
+        } else {
+            error.printStackTrace()
+        }
     }
 
     private fun showProgress(show: Boolean) {
@@ -138,7 +144,7 @@ class SignInActivity : AppCompatActivity() {
                     showProgress(false)
                 }
             }
-        });
+        })
     }
 
     private fun clearToken(accessToken: String) {
@@ -163,7 +169,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun checkPlayServices(): Boolean {
-        val api = GoogleApiAvailability.getInstance();
+        val api = GoogleApiAvailability.getInstance()
         val resultCode = api.isGooglePlayServicesAvailable(this)
         if (resultCode != ConnectionResult.SUCCESS) {
             if (api.isUserResolvableError(resultCode)) {

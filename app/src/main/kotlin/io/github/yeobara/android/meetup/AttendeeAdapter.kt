@@ -12,8 +12,8 @@ import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.squareup.picasso.Picasso
-import io.github.yeobara.android.Const
 import io.github.yeobara.android.R
+import io.github.yeobara.android.app.Const
 import java.util.*
 
 public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee>) :

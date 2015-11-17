@@ -1,4 +1,4 @@
-package io.github.yeobara.android
+package io.github.yeobara.android.app
 
 import android.app.Application
 import com.firebase.client.Firebase

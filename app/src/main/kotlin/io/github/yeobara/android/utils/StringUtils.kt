@@ -14,7 +14,7 @@ public object StringUtils {
     public fun createdAt(created: Long): String {
         return DateUtils.getRelativeTimeSpanString(
                 created, System.currentTimeMillis(), 0,
-                DateUtils.FORMAT_ABBREV_RELATIVE).toString();
+                DateUtils.FORMAT_ABBREV_RELATIVE).toString()
     }
 }
 
