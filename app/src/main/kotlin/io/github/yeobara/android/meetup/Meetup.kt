@@ -14,4 +14,5 @@ public class Meetup() {
     val hashcode: String = ""
     val host: String = ""
     var nearest: Boolean = false
+    val latLng: LatLong = LatLong()
 }

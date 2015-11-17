@@ -2,19 +2,26 @@ package io.github.yeobara.android.meetup
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import com.firebase.client.*
+import com.squareup.picasso.Picasso
 import io.github.importre.eddystone.Beacon
 import io.github.importre.eddystone.EddyStoneCallback
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
+import io.github.yeobara.android.utils.ImageUtils
 import io.github.yeobara.android.utils.StringUtils
+import io.github.yeobara.android.utils.UiUtils
 import java.util.*
 
 public class MeetupAdapter(val activity: Activity,
@@ -24,6 +31,7 @@ public class MeetupAdapter(val activity: Activity,
     public val keys: ArrayList<String> = arrayListOf()
     public val meetups: ArrayList<Meetup> = arrayListOf()
 
+    private var hasNearest: Boolean = false
     private var user: User? = null
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
@@ -68,9 +76,12 @@ public class MeetupAdapter(val activity: Activity,
         view.setTag(R.id.attendees, view.findViewById(R.id.attendees))
         view.setTag(R.id.attendees_count, view.findViewById(R.id.attendees_count))
         view.setTag(R.id.date, view.findViewById(R.id.date))
+        view.setTag(R.id.location, view.findViewById(R.id.location))
         view.setTag(R.id.description, view.findViewById(R.id.description))
         view.setTag(R.id.rvsp, view.findViewById(R.id.rvsp))
         view.setTag(R.id.checkin, view.findViewById(R.id.checkin))
+        view.setTag(R.id.map_frame, view.findViewById(R.id.map_frame))
+        view.setTag(R.id.map, view.findViewById(R.id.map))
         return MeetupHolder(view)
     }
 
@@ -151,11 +162,13 @@ public class MeetupAdapter(val activity: Activity,
     }
 
     override fun onSuccess(beacons: ArrayList<Beacon>) {
+        hasNearest = false
         meetups.forEachIndexed { i, meetup ->
             val nearest = containsHashcode(beacons, meetup.hashcode)
             if (meetup.nearest != nearest) {
                 meetup.nearest = nearest
                 notifyItemChanged(i)
+                hasNearest = true
             }
         }
     }
@@ -179,6 +192,23 @@ public class MeetupAdapter(val activity: Activity,
             initContents(meetup)
             initCheckBoxButtons(key, meetup)
             initAttendeesButton(meetup)
+            initMap(meetup)
+        }
+
+        private fun initMap(meetup: Meetup) {
+            val w = UiUtils.getDisplayWidth(activity)
+            val h = activity.resources.getDimension(R.dimen.list_item_height_xlarge).toInt()
+            val lat = meetup.latLng.lat
+            val lng = meetup.latLng.lng
+            val zoom = 15
+            val url = ImageUtils.getGoogleMapUrl(w, h, lat, lng, zoom)
+            val iv = view.getTag(R.id.map) as ImageView
+            Picasso.with(activity).load(url).into(iv)
+
+            val v = view.getTag(R.id.map_frame) as View
+            v.setOnClickListener {
+                showGoogleMap(lat, lng, zoom, meetup)
+            }
         }
 
         private fun initAttendeesButton(meetup: Meetup) {
@@ -201,15 +231,34 @@ public class MeetupAdapter(val activity: Activity,
             setCheckListener(key, rvsp, Const.RVSP)
 
             val checkin = view.getTag(R.id.checkin) as CheckBox
-            setCheckListener(key, checkin, Const.CHECK_IN)
+            setCheckListener(key, checkin, Const.CHECKIN)
 
             val uid = meetupsRef.auth.uid ?: return
             meetupsRef.child("$key/attendees/$uid")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(data: DataSnapshot?) {
                             rvsp.isChecked = data?.value != null
+                            rvsp.visibility = if (meetup.nearest && rvsp.isChecked) {
+                                View.GONE
+                            } else {
+                                View.VISIBLE
+                            }
+
                             data?.getValue(Attendee::class.java)?.let { attendee ->
-                                checkin.isChecked = Const.CHECK_IN.equals(attendee.status)
+                                when (attendee.status) {
+                                    Const.CHECKED -> {
+                                        checkin.isChecked = true
+                                        checkin.isEnabled = false
+                                        checkin.setText(R.string.checked)
+                                    }
+                                    Const.CHECKIN -> {
+                                        checkin.isChecked = true
+                                        checkin.isEnabled = true
+                                        checkin.setText(R.string.checkin)
+                                    }
+                                    else -> {
+                                    }
+                                }
                             }
 
                             checkin.visibility = if (meetup.nearest && rvsp.isChecked) {
@@ -228,30 +277,35 @@ public class MeetupAdapter(val activity: Activity,
             val dateView = view.getTag(R.id.date) as TextView
             dateView.text = meetup.date
 
+            val location = view.getTag(R.id.location) as TextView
+            location.text = meetup.latLng.toString()
+
             val descriptionView = view.getTag(R.id.description) as TextView
             descriptionView.text = meetup.description
         }
 
         private fun initToolbar(meetup: Meetup) {
             val toolbar = view.getTag(R.id.card_toolbar) as Toolbar
-            if (meetup.nearest) {
-                toolbar.setBackgroundResource(R.color.colorAccent)
-                toolbar.setTitleTextAppearance(activity, R.style.ActionBar_TitleText)
-                toolbar.setSubtitleTextAppearance(activity, R.style.ActionBar_SubTitleText)
-            } else {
-                toolbar.background = null
-                toolbar.setTitleTextAppearance(activity, R.style.ActionBar_TitleText_Inverse)
-                toolbar.setSubtitleTextAppearance(activity, R.style.ActionBar_SubTitleText_Inverse)
-            }
             toolbar.title = meetup.friendlyName
             toolbar.subtitle = "${meetup.host} · ${StringUtils.createdAt(meetup.created)}"
+            toolbar.setNavigationIcon(if (meetup.nearest) {
+                R.drawable.oval_location_on
+            } else {
+                R.drawable.oval_location_off
+            })
+
+            toolbar.setNavigationOnClickListener {
+                if (meetup.nearest) {
+                    Toast.makeText(activity, R.string.toast_nearby, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         private fun setCheckListener(key: String, cb: CheckBox, currentStatus: String) {
             cb.setOnCheckedChangeListener { button, checked ->
                 if (button.isPressed) {
                     val status = if (checked) currentStatus
-                    else if (currentStatus.equals(Const.CHECK_IN)) Const.RVSP
+                    else if (currentStatus.equals(Const.CHECKIN)) Const.RVSP
                     else null
 
                     meetupsRef.auth.uid?.let { id ->
@@ -261,6 +315,18 @@ public class MeetupAdapter(val activity: Activity,
                 }
             }
         }
+    }
+
+    private fun showGoogleMap(lat: Float, lng: Float, zoom: Int, meetup: Meetup) {
+        val label = meetup.friendlyName
+        val uriBegin = "geo:$lat,$lng"
+        val query = "$lat,$lng($label)"
+        val encodedQuery = Uri.encode(query)
+        val uriString = "$uriBegin?q=$encodedQuery&z=$zoom"
+        val uri = Uri.parse(uriString)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        intent.setPackage("com.google.android.apps.maps")
+        activity.startActivity(intent)
     }
 }
 

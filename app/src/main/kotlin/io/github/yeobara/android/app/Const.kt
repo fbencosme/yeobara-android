@@ -4,8 +4,9 @@ object Const {
 
     public val FB_BASE: String = "https://yeobara.firebaseio.com"
 
-    public val CHECK_IN: String = "checkin"
     public val RVSP: String = "rvsp"
+    public val CHECKIN: String = "checkin"
+    public val CHECKED: String = "checked"
 
     public val REQUEST_PICK_ACCOUNT: Int = 200
     public val REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR: Int = 201

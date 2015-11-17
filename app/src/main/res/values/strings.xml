@@ -1,17 +1,21 @@
 <resources>
     <string name="app_name">yeobara</string>
     <string name="action_settings">Settings</string>
+    <string name="action_my_location">My Location</string>
 
     <string name="setting_logout">Logout</string>
 
     <string name="yeobara">Yeobara~~~</string>
     <string name="rvsp">RVSP</string>
     <string name="checkin">Check In</string>
+    <string name="checked">Checked</string>
     <string name="nickname">Nickname</string>
     <string name="meetups">Meetups</string>
     <string name="settings">Settings</string>
 
     <string name="error_permission_not_granted">위치정보 권한을 주셔야 사용 가능합니다.</string>
+
+    <string name="toast_nearby">Located nearby</string>
 
     <string name="dialog_title_attendees">Attendees</string>
     <string name="dialog_title_signup">Sign up</string>
