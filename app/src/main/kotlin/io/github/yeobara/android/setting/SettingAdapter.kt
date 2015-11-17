@@ -2,6 +2,7 @@ package io.github.yeobara.android.setting
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +11,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import io.github.yeobara.android.BuildConfig
 import io.github.yeobara.android.R
+import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.sign.SignInActivity
 import io.github.yeobara.android.utils.PrefUtils
+import io.github.yeobara.android.utils.UiUtils
 
 public class SettingAdapter(val activity: Activity) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -28,8 +31,23 @@ public class SettingAdapter(val activity: Activity) :
         activity.finish()
     }
 
+    private val github: ((View) -> Unit) = {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = Uri.parse(Const.GITHUB)
+        intent.setData(uri)
+        activity.startActivity(intent)
+    }
+
+    private val githubAndroid: ((View) -> Unit) = {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = Uri.parse(Const.GITHUB_ANDROID)
+        intent.setData(uri)
+        activity.startActivity(intent)
+    }
+
     private val items = arrayListOf(
-            Triple(R.drawable.ic_android, BuildConfig.VERSION_NAME, null),
+            Triple(R.drawable.ic_android, BuildConfig.VERSION_NAME, githubAndroid),
+            Triple(R.drawable.ic_action_github, activity.getString(R.string.github), github),
             Triple(R.drawable.ic_lock_open, activity.getString(R.string.setting_logout), logout)
     )
 
@@ -61,6 +79,8 @@ public class SettingAdapter(val activity: Activity) :
             val title = view.getTag(R.id.title) as TextView
 
             icon.setImageResource(item.first)
+            val color = UiUtils.getColor(view.context, R.color.primary_text)
+            icon.drawable?.setTint(color)
             title.text = item.second
             view.setOnClickListener {
                 item.third?.invoke(it)

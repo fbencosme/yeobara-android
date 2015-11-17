@@ -3,6 +3,8 @@ package io.github.yeobara.android.app
 object Const {
 
     public val FB_BASE: String = "https://yeobara.firebaseio.com"
+    public val GITHUB: String = "https://github.com/yeobara"
+    public val GITHUB_ANDROID: String = "https://github.com/yeobara/yeobara-android"
 
     public val RVSP: String = "rvsp"
     public val CHECKIN: String = "checkin"

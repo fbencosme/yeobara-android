@@ -1,9 +1,11 @@
 package io.github.yeobara.android.meetup
 
 import android.content.Context
+import android.graphics.Outline
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
@@ -48,6 +50,16 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
             view.setTag(R.id.icon, icon)
             view.setTag(R.id.title, title)
             view.setTag(R.id.subtitle, subtitle)
+
+            icon.clipToOutline = true
+            icon.outlineProvider = object : ViewOutlineProvider() {
+                override fun getOutline(view: View?, outline: Outline?) {
+                    if (view != null && outline != null) {
+                        val size = view.resources.getDimension(R.dimen.avatar_icon_size).toInt()
+                        outline.setOval(0, 0, size, size)
+                    }
+                }
+            }
         } else {
             view = convertView
             icon = view.getTag(R.id.icon) as ImageView
