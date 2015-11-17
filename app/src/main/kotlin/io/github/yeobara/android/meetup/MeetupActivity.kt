@@ -16,6 +16,7 @@ import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.tbruyelle.rxpermissions.RxPermissions
+import io.github.importre.eddystone.EddyStone
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.setting.SettingsActivity
@@ -30,6 +31,10 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
 
     private val adapter: MeetupAdapter by lazy {
         MeetupAdapter(this, this)
+    }
+
+    private val eddystone: EddyStone by lazy {
+        EddyStone(this, adapter, Const.REQUEST_ENABLE_BLUETOOTH)
     }
 
     private val userRef: Firebase by lazy {
@@ -52,12 +57,12 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
     override fun onStart() {
         super.onStart()
         initUser()
-        adapter.startEddyStone()
+        eddystone.start()
     }
 
     override fun onStop() {
         super.onStop()
-        adapter.stopEddyStone()
+        eddystone.stop()
     }
 
     override fun onDestroy() {
@@ -147,7 +152,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
                 .request(Manifest.permission.ACCESS_COARSE_LOCATION)
                 .subscribe({ granted ->
                     if (granted) {
-                        adapter.startEddyStone()
+                        eddystone.start()
                     } else {
                         val message = R.string.error_permission_not_granted
                         showSnackbar(message)
@@ -169,7 +174,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         if (Activity.RESULT_OK == resultCode) {
             when (requestCode) {
                 Const.REQUEST_ENABLE_BLUETOOTH -> {
-                    adapter.startEddyStone()
+                    eddystone.initAndStart()
                 }
                 Const.REQUEST_SETTINGS -> {
                     finish()

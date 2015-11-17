@@ -11,7 +11,6 @@ import android.widget.CheckBox
 import android.widget.TextView
 import com.firebase.client.*
 import io.github.importre.eddystone.Beacon
-import io.github.importre.eddystone.EddyStone
 import io.github.importre.eddystone.EddyStoneCallback
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
@@ -28,7 +27,6 @@ public class MeetupAdapter(val activity: Activity,
     private var user: User? = null
     private var eventListener: ChildEventListener
     private val childEventListener: ChildEventListener
-    private val eddystone: EddyStone
 
     private val meetupsRef: Firebase by lazy {
         Firebase("${Const.FB_BASE}/meetups")
@@ -41,15 +39,12 @@ public class MeetupAdapter(val activity: Activity,
     init {
         childEventListener = initChildEventListener()
         eventListener = query.addChildEventListener(childEventListener)
-        eddystone = EddyStone(activity, this, Const.REQUEST_ENABLE_BLUETOOTH)
-        eddystone.start()
     }
 
     public fun clear() {
         keys.clear()
         meetups.clear()
         query.removeEventListener(eventListener)
-        eddystone.stop()
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
@@ -176,15 +171,6 @@ public class MeetupAdapter(val activity: Activity,
     }
 
     override fun onFailure(message: String, deviceAddress: String?) {
-    }
-
-    fun startEddyStone() {
-        eddystone.stop()
-        eddystone.start()
-    }
-
-    fun stopEddyStone() {
-        eddystone.stop()
     }
 
     inner class MeetupHolder(val view: View) : RecyclerView.ViewHolder(view) {

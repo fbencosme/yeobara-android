@@ -128,8 +128,6 @@ class SignInActivity : AppCompatActivity() {
         homeRef.authWithOAuthToken("google", accessToken, object : Firebase.AuthResultHandler {
             override fun onAuthenticationError(error: FirebaseError?) {
                 if (error != null) {
-                    val msg = "${error.message} : ${error.details}"
-                    Toast.makeText(applicationContext, msg, Toast.LENGTH_LONG).show()
                     clearToken(accessToken)
                 }
                 showProgress(false)

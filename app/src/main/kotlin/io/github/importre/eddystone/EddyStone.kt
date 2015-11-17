@@ -11,7 +11,7 @@ import android.content.Intent
 import android.os.ParcelUuid
 import java.util.*
 
-public class EddyStone(activity: Activity, val cb: EddyStoneCallback, val requestCodeForBT: Int) {
+public class EddyStone(val activity: Activity, val cb: EddyStoneCallback, val requestCodeForBT: Int) {
 
     companion object {
         public val UUID: ParcelUuid = ParcelUuid.fromString("0000FEAA-0000-1000-8000-00805F9B34FB")
@@ -28,7 +28,15 @@ public class EddyStone(activity: Activity, val cb: EddyStoneCallback, val reques
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .setReportDelay(0)
                 .build()
+        init()
+    }
 
+    public fun initAndStart() {
+        init()
+        start()
+    }
+
+    public fun init() {
         val ctx = activity.applicationContext
         val blManager = ctx.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         blManager.adapter?.let {
