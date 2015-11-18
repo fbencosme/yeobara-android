@@ -2,8 +2,8 @@ package io.github.yeobara.android.utils
 
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.support.annotation.ColorRes
+import android.support.v4.content.ContextCompat
 import android.util.DisplayMetrics
 import android.view.WindowManager
 
@@ -26,14 +26,8 @@ public object UiUtils {
         return displayMetrics.widthPixels
     }
 
-    @Suppress("DEPRECATED_SYMBOL_WITH_MESSAGE")
     public fun getColor(context: Context, @ColorRes color: Int): Int {
-        val r = context.resources
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            r.getColor(color, context.theme)
-        } else {
-            r.getColor(color)
-        }
+        return ContextCompat.getColor(context, color)
     }
 }
 
