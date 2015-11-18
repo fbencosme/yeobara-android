@@ -16,7 +16,8 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -41,21 +42,14 @@
         </FrameLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".MainActivity"
-        tools:showIn="@layout/activity_main">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingLeft="@dimen/meetup_list_margin_vertical"
-            android:paddingRight="@dimen/meetup_list_margin_vertical"
-            android:paddingTop="@dimen/meetup_card_margin_horizontal" />
-    </RelativeLayout>
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/meetup_list_margin_vertical"
+        android:paddingRight="@dimen/meetup_list_margin_vertical"
+        android:paddingTop="@dimen/meetup_card_margin_horizontal"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </android.support.design.widget.CoordinatorLayout>
