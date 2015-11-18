@@ -118,7 +118,7 @@ github {
 play {
     serviceAccountEmail = props.get('playStorePublisher')
     pk12File = file(props.get('playStoreP12File'))
-    track = 'beta' // 'production' or 'rollout' or 'beta' or 'alpha'
+    track = 'production' // 'production' or 'rollout' or 'beta' or 'alpha'
     // userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1
     uploadImages = true
 }
