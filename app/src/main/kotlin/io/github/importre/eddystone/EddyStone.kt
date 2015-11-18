@@ -31,14 +31,11 @@ public class EddyStone(val activity: Activity, val cb: EddyStoneCallback, val re
         init()
     }
 
-    public fun initAndStart() {
-        init()
-        start()
-    }
-
     public fun init() {
-        val ctx = activity.applicationContext
-        val blManager = ctx.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        stop()
+
+        val systemService = activity.getSystemService(Context.BLUETOOTH_SERVICE)
+        val blManager = systemService as BluetoothManager
         blManager.adapter?.let {
             initScanner(activity, it, requestCodeForBT)
             initScanFilter()
