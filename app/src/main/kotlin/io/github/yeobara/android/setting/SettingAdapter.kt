@@ -46,9 +46,15 @@ public class SettingAdapter(val activity: Activity) :
     }
 
     private val items = arrayListOf(
-            Triple(R.drawable.ic_android, BuildConfig.VERSION_NAME, githubAndroid),
-            Triple(R.drawable.ic_action_github, activity.getString(R.string.github), github),
-            Triple(R.drawable.ic_lock_open, activity.getString(R.string.setting_logout), logout)
+            Triple(R.drawable.ic_android,
+                    "${activity.getString(R.string.app_name)} ${BuildConfig.VERSION_NAME}",
+                    githubAndroid),
+            Triple(R.drawable.ic_action_github,
+                    activity.getString(R.string.fork_me_on_github),
+                    github),
+            Triple(R.drawable.ic_lock_open,
+                    activity.getString(R.string.setting_logout),
+                    logout)
     )
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
