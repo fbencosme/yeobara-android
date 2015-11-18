@@ -23,7 +23,7 @@
 
         <activity
             android:name=".sign.SignInActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize">
+            android:screenOrientation="sensorPortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
