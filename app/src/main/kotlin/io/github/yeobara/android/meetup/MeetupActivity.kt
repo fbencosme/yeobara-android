@@ -3,8 +3,9 @@ package io.github.yeobara.android.meetup
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.support.annotation.StringRes
+import android.provider.Settings
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.StaggeredGridLayoutManager
@@ -22,10 +23,7 @@ import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.setting.SettingsActivity
 import io.github.yeobara.android.utils.NetworkUtils
 import io.github.yeobara.android.utils.UiUtils
-import kotlinx.android.synthetic.activity_main.coordLayout
-import kotlinx.android.synthetic.activity_main.progress
-import kotlinx.android.synthetic.activity_main.toolbar
-import kotlinx.android.synthetic.content_main.recyclerView
+import kotlinx.android.synthetic.activity_meetup.*
 
 class MeetupActivity : AppCompatActivity(), UpdateListener {
 
@@ -43,7 +41,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_meetup)
         setSupportActionBar(toolbar)
 
         if (userRef.auth == null) {
@@ -152,10 +150,12 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
                 .request(Manifest.permission.ACCESS_COARSE_LOCATION)
                 .subscribe({ granted ->
                     if (granted) {
-                        eddystone.start()
+                        eddystone.run {
+                            init()
+                            start()
+                        }
                     } else {
-                        val message = R.string.error_permission_not_granted
-                        showSnackbar(message)
+                        showPermissionError()
                     }
                 }, { error ->
                     showSnackbar(error.message ?: "permission error")
@@ -166,15 +166,28 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         Snackbar.make(coordLayout, message, Snackbar.LENGTH_LONG).show()
     }
 
-    private fun showSnackbar(@StringRes message: Int) {
-        Snackbar.make(coordLayout, message, Snackbar.LENGTH_LONG).show()
+    private fun showPermissionError() {
+        val message = R.string.error_permission_not_granted
+        Snackbar.make(coordLayout, message, Snackbar.LENGTH_INDEFINITE)
+                .setActionTextColor(UiUtils.getColor(this, android.R.color.holo_orange_light))
+                .setAction(R.string.settings, {
+                    val intent = Intent()
+                    val uri = Uri.fromParts("package", packageName, null)
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.setData(uri)
+                    startActivity(intent)
+                })
+                .show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (Activity.RESULT_OK == resultCode) {
             when (requestCode) {
                 Const.REQUEST_ENABLE_BLUETOOTH -> {
-                    eddystone.initAndStart()
+                    eddystone.run {
+                        init()
+                        start()
+                    }
                 }
                 Const.REQUEST_SETTINGS -> {
                     finish()
