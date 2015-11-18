@@ -6,6 +6,8 @@ import java.util.*
 @JsonIgnoreProperties("attendees", ignoreUnknown = true)
 public class Meetup() {
 
+    var nearest: Boolean = false
+
     val attendees: ArrayList<Attendee> = arrayListOf()
     val created: Long = 0L
     val date: String = ""
@@ -13,6 +15,6 @@ public class Meetup() {
     val friendlyName: String = ""
     val hashcode: String = ""
     val host: String = ""
-    var nearest: Boolean = false
     val latLng: LatLong = LatLong()
+    val formattedAddress: String = ""
 }

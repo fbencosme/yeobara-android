@@ -44,6 +44,8 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
         if (convertView == null) {
             val inflater = LayoutInflater.from(context)
             view = inflater.inflate(LAYOUT, parent, false)
+            view.background = null
+
             icon = view.findViewById(R.id.icon) as ImageView
             title = view.findViewById(R.id.title) as TextView
             subtitle = view.findViewById(R.id.subtitle) as TextView

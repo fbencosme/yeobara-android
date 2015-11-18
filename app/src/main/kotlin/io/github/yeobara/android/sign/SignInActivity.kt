@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.Toast
 import com.firebase.client.AuthData
 import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
@@ -21,9 +20,7 @@ import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.meetup.MeetupActivity
 import io.github.yeobara.android.utils.PrefUtils
-import kotlinx.android.synthetic.activity_signin.progress
-import kotlinx.android.synthetic.activity_signin.signin
-import kotlinx.android.synthetic.activity_signin.toolbar
+import kotlinx.android.synthetic.activity_signin.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -44,7 +41,6 @@ class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signin)
-        setSupportActionBar(toolbar)
         initUi()
         trySignIn()
     }
@@ -135,7 +131,6 @@ class SignInActivity : AppCompatActivity() {
 
             override fun onAuthenticated(authData: AuthData?) {
                 if (authData != null) {
-                    Toast.makeText(this@SignInActivity, R.string.yeobara, Toast.LENGTH_SHORT).show()
                     saveToken(accessToken)
                     startMainActivity()
                 } else {
@@ -171,7 +166,8 @@ class SignInActivity : AppCompatActivity() {
         val resultCode = api.isGooglePlayServicesAvailable(this)
         if (resultCode != ConnectionResult.SUCCESS) {
             if (api.isUserResolvableError(resultCode)) {
-                api.getErrorDialog(this, resultCode, Const.REQUEST_PLAY_SERVICES_RESOLUTION).show()
+                api.getErrorDialog(this, resultCode,
+                        Const.REQUEST_PLAY_SERVICES_RESOLUTION).show()
             }
             return false
         }

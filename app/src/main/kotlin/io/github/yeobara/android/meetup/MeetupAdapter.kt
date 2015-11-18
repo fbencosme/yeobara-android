@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -278,7 +279,10 @@ public class MeetupAdapter(val activity: Activity,
             dateView.text = meetup.date
 
             val location = view.getTag(R.id.location) as TextView
-            location.text = meetup.latLng.toString()
+            location.text = meetup.formattedAddress
+            if (TextUtils.isEmpty(location.text)) {
+                location.text = meetup.latLng.toString()
+            }
 
             val descriptionView = view.getTag(R.id.description) as TextView
             descriptionView.text = meetup.description
