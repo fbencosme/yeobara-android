@@ -1,67 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".MainActivity">
-
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:subtitleTextAppearance="@style/ActionBar.SubTitleText"
-                app:titleTextAppearance="@style/ActionBar.TitleText" />
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="?android:progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="-8dp"
-                android:indeterminate="true"
-                android:indeterminateTint="@android:color/white"
-                android:indeterminateTintMode="src_in"
-                android:visibility="gone" />
-        </FrameLayout>
-    </android.support.design.widget.AppBarLayout>
+    android:layout_centerInParent="true"
+    android:gravity="center"
+    android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="264dp"
+            android:layout_height="264dp"
             android:layout_centerInParent="true"
-            android:divider="@drawable/divider"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:showDividers="middle">
+            android:layout_gravity="bottom"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primary"
+            android:indeterminateTintMode="src_in"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/signin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/icon" />
-        </LinearLayout>
-
+        <ImageButton
+            android:id="@+id/signin"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:layout_centerInParent="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon" />
     </RelativeLayout>
-</android.support.design.widget.CoordinatorLayout>
+
+    <ImageView
+        android:layout_width="256dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/yeobara" />
+</LinearLayout>
