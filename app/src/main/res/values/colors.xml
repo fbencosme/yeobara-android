@@ -10,5 +10,6 @@
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
     <color name="pink">#FF4081</color>
+    <color name="background">#EEEEEE</color>
 </resources>
 

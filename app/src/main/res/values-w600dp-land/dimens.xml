@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+    <dimen name="toolbar_title_size">18sp</dimen>
+    <dimen name="toolbar_subtitle_size">12sp</dimen>
+
     <dimen name="meetup_card_margin_vertical">8dp</dimen>
     <dimen name="meetup_card_margin_horizontal">16dp</dimen>
     <dimen name="meetup_list_margin_vertical">8dp</dimen>
