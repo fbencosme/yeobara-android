@@ -2,6 +2,7 @@ package io.github.yeobara.android.setting
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -83,10 +84,12 @@ public class SettingAdapter(val activity: Activity) :
         fun setItem(item: Triple<Int, String, ((View) -> Unit)?>) {
             val icon = view.getTag(R.id.icon) as ImageView
             val title = view.getTag(R.id.title) as TextView
+            val color = UiUtils.getColor(view.context, R.color.secondary_text)
 
-            icon.setImageResource(item.first)
-            val color = UiUtils.getColor(view.context, R.color.primary_text)
             icon.drawable?.setTint(color)
+            icon.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+            icon.setImageResource(item.first)
+            title.setTextColor(color)
             title.text = item.second
             view.setOnClickListener {
                 item.third?.invoke(it)

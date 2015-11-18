@@ -18,7 +18,7 @@
             android:layout_centerInParent="true"
             android:layout_gravity="bottom"
             android:indeterminate="true"
-            android:indeterminateTint="@color/primary"
+            android:indeterminateTint="@color/accent"
             android:indeterminateTintMode="src_in"
             android:visibility="gone" />
 
@@ -36,4 +36,15 @@
         android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:src="@drawable/yeobara" />
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/space_between_content_area" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/google_hack_fair" />
 </LinearLayout>

@@ -12,6 +12,7 @@
     <string name="meetups">Meetups</string>
     <string name="settings">Settings</string>
     <string name="fork_me_on_github">Fork me on Github</string>
+    <string name="google_hack_fair">2015 Google HackFair</string>
 
     <string name="error_permission_not_granted">Needs to know your approximate location to use Eddystone.</string>
 
