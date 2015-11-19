@@ -112,7 +112,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
             val nickname = providerData["displayName"]?.toString() ?: return null
             val email = providerData["email"]?.toString() ?: return null
             val profile = providerData["profileImageURL"]?.toString()
-            val user = User(uid, nickname, email, profile)
+            val user = User(uid, nickname, email, profileImageURL = profile)
             userRef.child(uid).setValue(user)
             user
         } else {

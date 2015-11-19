@@ -9,29 +9,20 @@ import android.view.ViewOutlineProvider
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.firebase.client.DataSnapshot
-import com.firebase.client.Firebase
-import com.firebase.client.FirebaseError
-import com.firebase.client.ValueEventListener
 import com.squareup.picasso.Picasso
 import io.github.yeobara.android.R
-import io.github.yeobara.android.app.Const
 import java.util.*
 
-public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee>) :
-        ArrayAdapter<Attendee>(context, AttendeeAdapter.LAYOUT, attendees) {
+public class AttendeeAdapter(context: Context, val attendees: ArrayList<User>) :
+        ArrayAdapter<User>(context, AttendeeAdapter.LAYOUT, attendees) {
 
     companion object {
         val LAYOUT = R.layout.layout_two_line
     }
 
-    private val userRef: Firebase by lazy {
-        Firebase("${Const.FB_BASE}/users")
-    }
-
     override fun getCount(): Int = attendees.size
 
-    override fun getItem(position: Int): Attendee {
+    override fun getItem(position: Int): User {
         return attendees[position]
     }
 
@@ -69,21 +60,11 @@ public class AttendeeAdapter(context: Context, val attendees: ArrayList<Attendee
             subtitle = view.getTag(R.id.subtitle) as TextView
         }
 
-        val item = getItem(position)
-        userRef.child(item.userId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(data: DataSnapshot?) {
-                data?.let {
-                    it.getValue(User::class.java)?.let { user ->
-                        user.profileImageURL?.let { Picasso.with(context).load(it).into(icon) }
-                        title.text = user.nickname
-                        subtitle.text = item.status
-                    }
-                }
-            }
-
-            override fun onCancelled(error: FirebaseError?) {
-            }
-        })
+        icon.setImageResource(R.mipmap.ic_launcher)
+        val user = getItem(position)
+        user.profileImageURL?.let { Picasso.with(context).load(it).into(icon) }
+        title.text = user.nickname
+        subtitle.text = user.status
         return view
     }
 }
