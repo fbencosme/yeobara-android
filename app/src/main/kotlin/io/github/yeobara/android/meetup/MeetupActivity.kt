@@ -20,7 +20,9 @@ import com.tbruyelle.rxpermissions.RxPermissions
 import io.github.importre.eddystone.EddyStone
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
+import io.github.yeobara.android.gcm.RegistrationIntentService
 import io.github.yeobara.android.setting.SettingsActivity
+import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.NetworkUtils
 import io.github.yeobara.android.utils.UiUtils
 import kotlinx.android.synthetic.activity_meetup.*
@@ -49,6 +51,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
         } else {
             checkPermission()
             initMeetups()
+            checkGcm()
         }
     }
 
@@ -112,7 +115,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
             val nickname = providerData["displayName"]?.toString() ?: return null
             val email = providerData["email"]?.toString() ?: return null
             val profile = providerData["profileImageURL"]?.toString()
-            val user = User(uid, nickname, email, profile)
+            val user = User(uid, nickname, email, profileImageURL = profile)
             userRef.child(uid).setValue(user)
             user
         } else {
@@ -193,6 +196,14 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
                     finish()
                 }
             }
+        }
+    }
+
+    private fun checkGcm() {
+        if (AppUtils.checkPlayServices(this)) {
+            // Start IntentService to register this application with GCM.
+            val intent = Intent(this, RegistrationIntentService::class.java)
+            startService(intent)
         }
     }
 }

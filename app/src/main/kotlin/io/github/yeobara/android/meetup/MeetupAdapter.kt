@@ -151,7 +151,7 @@ public class MeetupAdapter(val activity: Activity,
 
             private fun addAttendees(meetup: Meetup, snapshot: DataSnapshot) {
                 snapshot.child("attendees").children.forEach {
-                    meetup.attendees.add(it.getValue(Attendee::class.java))
+                    meetup.attendees.add(it.getValue(User::class.java))
                 }
             }
         }
@@ -245,7 +245,7 @@ public class MeetupAdapter(val activity: Activity,
                                 View.VISIBLE
                             }
 
-                            data?.getValue(Attendee::class.java)?.let { attendee ->
+                            data?.getValue(User::class.java)?.let { attendee ->
                                 when (attendee.status) {
                                     Const.CHECKED -> {
                                         checkin.isChecked = true
@@ -313,8 +313,11 @@ public class MeetupAdapter(val activity: Activity,
                     else null
 
                     meetupsRef.auth.uid?.let { id ->
-                        val attendee = if (status != null) Attendee(id, status) else null
-                        meetupsRef.child("$key/attendees/$id").setValue(attendee)
+                        user?.let {
+                            it.status = status ?: ""
+                            val attendee = if (status != null) it else null
+                            meetupsRef.child("$key/attendees/$id").setValue(attendee)
+                        }
                     }
                 }
             }

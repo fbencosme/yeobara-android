@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 public class User(val id: String,
                   val nickname: String,
                   val email: String,
-                  val profileImageURL: String? = null) {
+                  var status: String = "",
+                  val profileImageURL: String? = null,
+                  val gcmToken: String? = null) {
 
     constructor() : this("", "", "") {
     }

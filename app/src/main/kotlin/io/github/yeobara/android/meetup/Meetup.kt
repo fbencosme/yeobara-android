@@ -8,7 +8,7 @@ public class Meetup() {
 
     var nearest: Boolean = false
 
-    val attendees: ArrayList<Attendee> = arrayListOf()
+    val attendees: ArrayList<User> = arrayListOf()
     val created: Long = 0L
     val date: String = ""
     val description: String = ""
