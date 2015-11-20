@@ -4,8 +4,8 @@ apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
 def prevVersionName = "0.4.1"
-def currVersionName = "0.5.0"
-def currVersionCode = 12
+def currVersionName = "0.5.1"
+def currVersionCode = 13
 def prevTagName = "${prevVersionName}"
 def currTagName = "${currVersionName}"
 def changelog = """
