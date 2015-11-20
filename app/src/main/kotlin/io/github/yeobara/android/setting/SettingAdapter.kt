@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.firebase.client.Firebase
 import io.github.yeobara.android.BuildConfig
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
@@ -26,6 +27,12 @@ public class SettingAdapter(val activity: Activity) :
 
     private val logout: ((View) -> Unit) = {
         PrefUtils.clearAll(activity)
+
+        val userRef = Firebase("${Const.FB_BASE}/users")
+        userRef.auth?.uid?.let { uid ->
+            userRef.child("$uid/gcmToken").setValue(null)
+        }
+
         val intent = Intent(activity, SignInActivity::class.java)
         activity.startActivity(intent)
         activity.setResult(Activity.RESULT_OK)

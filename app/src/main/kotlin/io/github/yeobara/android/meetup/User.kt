@@ -7,7 +7,8 @@ public class User(val id: String,
                   val nickname: String,
                   val email: String,
                   var status: String = "",
-                  val profileImageURL: String? = null) {
+                  val profileImageURL: String? = null,
+                  val gcmToken: String? = null) {
 
     constructor() : this("", "", "") {
     }

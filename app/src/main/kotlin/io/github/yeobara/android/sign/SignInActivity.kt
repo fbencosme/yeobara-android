@@ -14,11 +14,11 @@ import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.common.AccountPicker
-import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.meetup.MeetupActivity
+import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.PrefUtils
 import kotlinx.android.synthetic.activity_signin.*
 import rx.Observable
@@ -106,7 +106,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun pickUserAccount() {
-        if (!checkPlayServices()) {
+        if (!AppUtils.checkPlayServices(this)) {
             return
         }
 
@@ -159,19 +159,6 @@ class SignInActivity : AppCompatActivity() {
         val intent = Intent(this, MeetupActivity::class.java)
         startActivity(intent)
         finish()
-    }
-
-    private fun checkPlayServices(): Boolean {
-        val api = GoogleApiAvailability.getInstance()
-        val resultCode = api.isGooglePlayServicesAvailable(this)
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (api.isUserResolvableError(resultCode)) {
-                api.getErrorDialog(this, resultCode,
-                        Const.REQUEST_PLAY_SERVICES_RESOLUTION).show()
-            }
-            return false
-        }
-        return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
