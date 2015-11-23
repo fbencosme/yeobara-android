@@ -54,9 +54,9 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun initUi() {
-        signin.setOnClickListener {
-            signIn()
-        }
+        val click: ((View) -> Unit) = { signIn() }
+        logo.setOnClickListener(click)
+        signin.setOnClickListener(click)
     }
 
     private fun signIn() {
@@ -101,8 +101,9 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun showProgress(show: Boolean) {
+        logo.isEnabled = !show
         signin.isEnabled = !show
-        progress.visibility = if (show) View.VISIBLE else View.GONE
+        progress.visibility = if (show) View.VISIBLE else View.INVISIBLE
     }
 
     private fun pickUserAccount() {
