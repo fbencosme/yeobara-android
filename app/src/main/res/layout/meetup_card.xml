@@ -115,20 +115,20 @@
             </LinearLayout>
 
             <CheckBox
-                android:id="@+id/rvsp"
+                android:id="@+id/rsvp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="@dimen/space_between_content_area"
-                android:text="@string/rvsp" />
+                android:text="@string/rsvp" />
 
             <CheckBox
                 android:id="@+id/checkin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toEndOf="@id/rvsp"
+                android:layout_toEndOf="@id/rsvp"
                 android:text="@string/checkin" />
 
         </RelativeLayout>

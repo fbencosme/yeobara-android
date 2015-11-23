@@ -68,10 +68,10 @@ class SignInActivity : AppCompatActivity() {
 
         showProgress(true)
         Observable.just(email)
-                .map({ mail ->
+                .map { mail ->
                     val account = Account(mail, "com.google")
                     GoogleAuthUtil.getToken(this, account, SCOPE)
-                })
+                }
                 .filter { it != null }
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -144,9 +144,9 @@ class SignInActivity : AppCompatActivity() {
     private fun clearToken(accessToken: String) {
         PrefUtils.clearAll(this)
         Observable.just(accessToken)
-                .map({ token ->
+                .map { token ->
                     GoogleAuthUtil.clearToken(this, token)
-                })
+                }
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()

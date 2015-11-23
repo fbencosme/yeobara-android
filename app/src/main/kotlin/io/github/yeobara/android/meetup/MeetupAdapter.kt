@@ -79,7 +79,7 @@ public class MeetupAdapter(val activity: Activity,
         view.setTag(R.id.date, view.findViewById(R.id.date))
         view.setTag(R.id.location, view.findViewById(R.id.location))
         view.setTag(R.id.description, view.findViewById(R.id.description))
-        view.setTag(R.id.rvsp, view.findViewById(R.id.rvsp))
+        view.setTag(R.id.rsvp, view.findViewById(R.id.rsvp))
         view.setTag(R.id.checkin, view.findViewById(R.id.checkin))
         view.setTag(R.id.map_frame, view.findViewById(R.id.map_frame))
         view.setTag(R.id.map, view.findViewById(R.id.map))
@@ -227,9 +227,9 @@ public class MeetupAdapter(val activity: Activity,
         }
 
         private fun initCheckBoxButtons(key: String, meetup: Meetup) {
-            val rvsp = view.getTag(R.id.rvsp) as CheckBox
-            rvsp.isEnabled = user != null
-            setCheckListener(key, rvsp, Const.RVSP)
+            val rsvp = view.getTag(R.id.rsvp) as CheckBox
+            rsvp.isEnabled = user != null
+            setCheckListener(key, rsvp, Const.RSVP)
 
             val checkin = view.getTag(R.id.checkin) as CheckBox
             setCheckListener(key, checkin, Const.CHECKIN)
@@ -238,8 +238,8 @@ public class MeetupAdapter(val activity: Activity,
             meetupsRef.child("$key/attendees/$uid")
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(data: DataSnapshot?) {
-                            rvsp.isChecked = data?.value != null
-                            rvsp.visibility = if (meetup.nearest && rvsp.isChecked) {
+                            rsvp.isChecked = data?.value != null
+                            rsvp.visibility = if (meetup.nearest && rsvp.isChecked) {
                                 View.GONE
                             } else {
                                 View.VISIBLE
@@ -262,7 +262,7 @@ public class MeetupAdapter(val activity: Activity,
                                 }
                             }
 
-                            checkin.visibility = if (meetup.nearest && rvsp.isChecked) {
+                            checkin.visibility = if (meetup.nearest && rsvp.isChecked) {
                                 View.VISIBLE
                             } else {
                                 View.GONE
@@ -309,7 +309,7 @@ public class MeetupAdapter(val activity: Activity,
             cb.setOnCheckedChangeListener { button, checked ->
                 if (button.isPressed) {
                     val status = if (checked) currentStatus
-                    else if (currentStatus.equals(Const.CHECKIN)) Const.RVSP
+                    else if (currentStatus.equals(Const.CHECKIN)) Const.RSVP
                     else null
 
                     meetupsRef.auth.uid?.let { id ->

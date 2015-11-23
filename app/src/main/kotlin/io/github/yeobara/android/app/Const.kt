@@ -6,7 +6,7 @@ object Const {
     public val GITHUB: String = "https://github.com/yeobara"
     public val GITHUB_ANDROID: String = "https://github.com/yeobara/yeobara-android"
 
-    public val RVSP: String = "rvsp"
+    public val RSVP: String = "rsvp"
     public val CHECKIN: String = "checkin"
     public val CHECKED: String = "checked"
 
