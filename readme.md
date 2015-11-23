@@ -17,7 +17,7 @@
 
 ## License
 
-MIT © [yeobara](https://github.com/yeobara)
+MIT © [Yeobara](https://github.com/yeobara)
 
 
 
