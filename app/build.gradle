@@ -3,62 +3,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
-def prevVersionName = "0.5.1"
-def currVersionName = "0.5.2"
-def currVersionCode = 14
+def prevVersionName = "0.5.2"
+def currVersionName = "0.6.0"
+def currVersionCode = 15
 def prevTagName = "${prevVersionName}"
 def currTagName = "${currVersionName}"
 def changelog = """
 ### What's New
-- Added custom scheme
-
-
-#### Custum Scheme Example for Server
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-    <title></title>
-    <style>
-      .btn {
-        background: #3498db;
-        border-radius: 28px;
-        font-family: Arial;
-        color: #ffffff;
-        font-size: 20px;
-        padding: 10px 20px 10px 20px;
-        text-decoration: none;
-      }
-
-      .container {
-        margin-top: 100px;
-      }
-    </style>
-  </head>
-  <body class="container" align="center">
-
-    <a class="btn">Open YEOBARA</a>
-
-    <script>
-      var YEOBARA_PKG = 'io.github.yeobara.android';
-      var SCHEME_ANDROID = 'intent://' + YEOBARA_PKG + '/#Intent;scheme=content;package=' + YEOBARA_PKG + ';end;';
-      var SCHEME_CUSTOM = 'content://' + YEOBARA_PKG;
-      function getHref() {
-        var ua = navigator.userAgent;
-        if (/(Android)/g.test(ua)) {
-          return (/(Chrome)/g.test(ua)) ? SCHEME_ANDROID : SCHEME_CUSTOM;
-        } else {
-          return;
-        }
-      }
-
-      var button = document.querySelector('.btn');
-      button.href = getHref();
-    </script>
-  </body>
-</html>
+- New Brand
+    - Changed Logo
+    - YEOBARA -> Yeobara
 ```
 
 ### Commit Log
