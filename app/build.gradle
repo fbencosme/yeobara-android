@@ -13,7 +13,7 @@ def changelog = """
 - New Brand
     - Changed Logo
     - YEOBARA -> Yeobara
-```
+
 
 ### Commit Log
 https://github.com/yeobara/yeobara-android/compare/${prevTagName}...${currTagName}
