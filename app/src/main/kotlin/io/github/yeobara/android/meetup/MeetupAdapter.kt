@@ -239,13 +239,16 @@ public class MeetupAdapter(val activity: Activity,
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(data: DataSnapshot?) {
                             rsvp.isChecked = data?.value != null
-                            rsvp.visibility = if (meetup.nearest && rsvp.isChecked) {
-                                View.GONE
-                            } else {
-                                View.VISIBLE
-                            }
+                            val visibility = meetup.nearest && rsvp.isChecked
+                            rsvp.visibility = if (visibility) View.GONE else View.VISIBLE
+                            checkin.visibility = if (visibility) View.VISIBLE else View.GONE
+                            updateCheckInButton(data)
+                        }
 
+                        private fun updateCheckInButton(data: DataSnapshot?) {
                             data?.getValue(User::class.java)?.let { attendee ->
+                                val visibility = meetup.nearest && rsvp.isChecked
+                                checkin.visibility = if (visibility) View.VISIBLE else View.GONE
                                 when (attendee.status) {
                                     Const.CHECKED -> {
                                         checkin.isChecked = true
@@ -260,12 +263,6 @@ public class MeetupAdapter(val activity: Activity,
                                     else -> {
                                     }
                                 }
-                            }
-
-                            checkin.visibility = if (meetup.nearest && rsvp.isChecked) {
-                                View.VISIBLE
-                            } else {
-                                View.GONE
                             }
                         }
 
