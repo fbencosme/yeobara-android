@@ -124,18 +124,22 @@ class SignInActivity : AppCompatActivity() {
     private fun loginGooglePlus(accessToken: String) {
         homeRef.authWithOAuthToken("google", accessToken, object : Firebase.AuthResultHandler {
             override fun onAuthenticationError(error: FirebaseError?) {
-                if (error != null) {
-                    clearToken(accessToken)
+                if (!isDestroyed) {
+                    if (error != null) {
+                        clearToken(accessToken)
+                    }
+                    showProgress(false)
                 }
-                showProgress(false)
             }
 
             override fun onAuthenticated(authData: AuthData?) {
-                if (authData != null) {
-                    saveToken(accessToken)
-                    startMainActivity()
-                } else {
-                    showProgress(false)
+                if (!isDestroyed) {
+                    if (authData != null) {
+                        saveToken(accessToken)
+                        startMainActivity()
+                    } else {
+                        showProgress(false)
+                    }
                 }
             }
         })
