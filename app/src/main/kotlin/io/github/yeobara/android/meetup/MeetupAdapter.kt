@@ -110,7 +110,7 @@ public class MeetupAdapter(val activity: Activity,
 
                 if (index >= 0 && meetups.size > index) {
                     addAttendees(meetup, snapshot)
-                    meetups.set(index, meetup)
+                    meetups[index] = meetup
                     notifyItemChanged(index)
                 }
             }
