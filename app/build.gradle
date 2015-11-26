@@ -3,16 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
-def prevVersionName = "0.5.2"
-def currVersionName = "0.6.1"
-def currVersionCode = 16
+def prevVersionName = "0.6.1"
+def currVersionName = "0.6.2"
+def currVersionCode = 17
 def prevTagName = "${prevVersionName}"
 def currTagName = "${currVersionName}"
 def changelog = """
 ### What's New
-- New Brand
-    - Changed Logo
-    - YEOBARA -> Yeobara
+- Fixed bugs
 
 
 ### Commit Log
