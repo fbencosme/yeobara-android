@@ -18,7 +18,7 @@ import io.github.yeobara.android.sign.SignInActivity
 import io.github.yeobara.android.utils.PrefUtils
 import io.github.yeobara.android.utils.UiUtils
 
-public class SettingAdapter(val activity: Activity) :
+public class SettingsAdapter(val activity: Activity) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.Toast
 import com.firebase.client.AuthData
 import com.firebase.client.Firebase
 import com.firebase.client.FirebaseError
@@ -17,6 +18,7 @@ import com.google.android.gms.common.AccountPicker
 import com.google.android.gms.common.GoogleApiAvailability
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
+import io.github.yeobara.android.app.YeobaraApp
 import io.github.yeobara.android.meetup.MeetupActivity
 import io.github.yeobara.android.utils.AppUtils
 import io.github.yeobara.android.utils.PrefUtils
@@ -24,67 +26,113 @@ import kotlinx.android.synthetic.activity_signin.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import javax.inject.Inject
 
-class SignInActivity : AppCompatActivity() {
+class SignInActivity : AppCompatActivity(), SignInView {
 
-    companion object {
-        public val SCOPE_PROFILE: String = "https://www.googleapis.com/auth/userinfo.profile"
-        public val SCOPE_EMAIL: String = "https://www.googleapis.com/auth/userinfo.email"
-        public val SCOPE: String = "oauth2:$SCOPE_PROFILE $SCOPE_EMAIL"
-    }
+    @Inject lateinit var homeRef: Firebase
 
-    private var email: String? = null
-    public val homeRef: Firebase by lazy {
-        Firebase("${Const.FB_BASE}")
+    var email: String? = null
+    val presenter: SignInPresenter by lazy {
+        SignInPresenter(this, homeRef)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signin)
+        YeobaraApp.app.component.inject(this)
+        presenter.attach(this)
         initUi()
-        trySignIn()
+        tryToSignIn()
     }
 
-    private fun trySignIn() {
+    override fun onDestroy() {
+        presenter.detach(this)
+        super.onDestroy()
+    }
+
+    private fun tryToSignIn() {
         val token = PrefUtils.getAccessToken(this)
         if (token.isNotEmpty()) {
-            showProgress(true)
-            loginGooglePlus(token)
+            presenter.loginGooglePlus(token, AuthHandler(token))
         }
     }
 
     private fun initUi() {
-        val click: ((View) -> Unit) = { signIn() }
+        val click: ((View) -> Unit) = { presenter.showAccountsDialog() }
         logo.setOnClickListener(click)
         signin.setOnClickListener(click)
     }
 
-    private fun signIn() {
+    private fun getRequest(email: String?): Observable<String>? {
+        return Observable.just(email)
+                .map { mail ->
+                    val account = Account(mail, "com.google")
+                    GoogleAuthUtil.getToken(this, account, Const.SIGNIN_SCOPE)
+                }
+    }
+
+    private fun startMeetupActivity() {
+        val intent = Intent(this, MeetupActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            Const.REQUEST_PICK_ACCOUNT -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    if (data != null) {
+                        email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+                        presenter.signIn(getRequest(email))
+                    }
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    // nothing
+                }
+            }
+            Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR -> {
+                presenter.signIn(getRequest(email))
+            }
+        }
+    }
+
+    override fun showAccountsDialog() {
         val email = email
         if (email == null) {
-            pickUserAccount()
+            presenter.pickUserAccount()
             return
         }
 
-        showProgress(true)
-        Observable.just(email)
-                .map { mail ->
-                    val account = Account(mail, "com.google")
-                    GoogleAuthUtil.getToken(this, account, SCOPE)
-                }
-                .filter { it != null }
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ token ->
-                    loginGooglePlus(token)
-                }, { error ->
-                    handleErrorOfSignIn(error)
-                })
+        val request = getRequest(email)
+        presenter.signIn(request)
     }
 
-    private fun handleErrorOfSignIn(error: Throwable?) {
-        showProgress(false)
-        if (error == null) return
+    override fun showAccountChooser() {
+        if (!AppUtils.checkPlayServices(this)) {
+            return
+        }
+
+        try {
+            val accountTypes = arrayOf("com.google")
+            val intent = AccountPicker.newChooseAccountIntent(
+                    null, null, accountTypes, false, null, null, null, null)
+            startActivityForResult(intent, Const.REQUEST_PICK_ACCOUNT)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun showLoading(show: Boolean) {
+        logo.isEnabled = !show
+        signin.isEnabled = !show
+        progress.visibility = if (show) View.VISIBLE else View.INVISIBLE
+    }
+
+    override fun showResult(result: String) {
+        presenter.loginGooglePlus(result, AuthHandler(result))
+    }
+
+    override fun showError(error: Throwable) {
         val api = GoogleApiAvailability.getInstance()
         if (error is GooglePlayServicesAvailabilityException) {
             val statusCode = error.connectionStatusCode
@@ -100,84 +148,38 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    private fun showProgress(show: Boolean) {
-        logo.isEnabled = !show
-        signin.isEnabled = !show
-        progress.visibility = if (show) View.VISIBLE else View.INVISIBLE
+    override fun showComplete() {
     }
 
-    private fun pickUserAccount() {
-        if (!AppUtils.checkPlayServices(this)) {
-            return
-        }
-
-        try {
-            val accountTypes = arrayOf("com.google")
-            val intent = AccountPicker.newChooseAccountIntent(
-                    null, null, accountTypes, false, null, null, null, null)
-            startActivityForResult(intent, Const.REQUEST_PICK_ACCOUNT)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    override fun showErrorMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    private fun loginGooglePlus(accessToken: String) {
-        homeRef.authWithOAuthToken("google", accessToken, object : Firebase.AuthResultHandler {
-            override fun onAuthenticationError(error: FirebaseError?) {
-                if (!isDestroyed) {
-                    if (error != null) {
-                        clearToken(accessToken)
-                    }
-                    showProgress(false)
-                }
-            }
-
-            override fun onAuthenticated(authData: AuthData?) {
-                if (!isDestroyed) {
-                    if (authData != null) {
-                        saveToken(accessToken)
-                        startMainActivity()
-                    } else {
-                        showProgress(false)
-                    }
-                }
-            }
-        })
+    override fun startYeobara(token: String) {
+        PrefUtils.setAccessToken(this, token)
+        startMeetupActivity()
     }
 
-    private fun clearToken(accessToken: String) {
+    override fun clearToken(token: String) {
         PrefUtils.clearAll(this)
-        Observable.just(accessToken)
-                .map { token ->
-                    GoogleAuthUtil.clearToken(this, token)
-                }
+        Observable.just(token)
+                .map { token -> GoogleAuthUtil.clearToken(this, token) }
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
     }
 
-    private fun saveToken(accessToken: String) {
-        PrefUtils.setAccessToken(this, accessToken)
-    }
+    inner class AuthHandler(val token: String) : Firebase.AuthResultHandler {
+        override fun onAuthenticationError(error: FirebaseError?) {
+            clearToken(token)
+            showLoading(false)
+        }
 
-    private fun startMainActivity() {
-        val intent = Intent(this, MeetupActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (Const.REQUEST_PICK_ACCOUNT == requestCode) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data != null) {
-                    email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
-                    signIn()
-                }
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                // nothing
+        override fun onAuthenticated(authData: AuthData?) {
+            if (authData != null) {
+                startYeobara(token)
             }
-        } else if (Const.REQUEST_RECOVER_FROM_PLAY_SERVICES_ERROR == requestCode) {
-            signIn()
+            showLoading(false)
         }
     }
 }

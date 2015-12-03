@@ -5,13 +5,12 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.MenuItem
 import io.github.yeobara.android.R
-import kotlinx.android.synthetic.activity_settings.recyclerView
-import kotlinx.android.synthetic.activity_settings.toolbar
+import kotlinx.android.synthetic.activity_settings.*
 
 public class SettingsActivity : AppCompatActivity() {
 
-    private val adapter: SettingAdapter by lazy {
-        SettingAdapter(this)
+    private val adapter: SettingsAdapter by lazy {
+        SettingsAdapter(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
