@@ -10,10 +10,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.firebase.client.*
 import com.squareup.picasso.Picasso
 import io.github.importre.eddystone.Beacon
@@ -231,8 +228,11 @@ public class MeetupAdapter(val activity: Activity,
             rsvp.isEnabled = user != null
             setCheckListener(key, rsvp, Const.RSVP)
 
-            val checkin = view.getTag(R.id.checkin) as CheckBox
-            setCheckListener(key, checkin, Const.CHECKIN)
+            val checkin = view.getTag(R.id.checkin) as Button
+            checkin.text = Const.CHECKIN
+            checkin.setOnClickListener {
+                openCheckInPage(key)
+            }
 
             val uid = meetupsRef.auth.uid ?: return
             meetupsRef.child("$key/attendees/$uid")
@@ -251,12 +251,10 @@ public class MeetupAdapter(val activity: Activity,
                                 checkin.visibility = if (visibility) View.VISIBLE else View.GONE
                                 when (attendee.status) {
                                     Const.CHECKED -> {
-                                        checkin.isChecked = true
                                         checkin.isEnabled = false
                                         checkin.setText(R.string.checked)
                                     }
                                     Const.CHECKIN -> {
-                                        checkin.isChecked = true
                                         checkin.isEnabled = true
                                         checkin.setText(R.string.checkin)
                                     }
@@ -319,6 +317,18 @@ public class MeetupAdapter(val activity: Activity,
                 }
             }
         }
+    }
+
+    private fun openCheckInPage(meetupKey: String) {
+        val userId = user?.id ?: return
+        val uri = Uri.Builder().scheme("http")
+                .authority("yeobara-1142.appspot.com")
+                .appendQueryParameter("meetup", meetupKey)
+                .appendQueryParameter("user-id", userId.replace("google:", ""))
+                .build()
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setData(uri)
+        activity.startActivity(intent)
     }
 
     private fun showGoogleMap(lat: Float, lng: Float, zoom: Int, meetup: Meetup) {
