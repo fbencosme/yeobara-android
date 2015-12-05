@@ -18,6 +18,23 @@
     - [Eddystone]
 
 
+## Configuration
+
+See `local.properties.example`.
+
+Basically you must
+    - set `firebaseUrl` key and be same value as you set in [yeobara-desktop].
+    - set `gcmSenderId` for GCM. Also you can refer to [yeobara-desktop].
+
+Optionally you can
+    - set `playStoreP12File`, `playStorePublisher` for release to PlayStore using gradle plugin
+        - https://github.com/Triple-T/gradle-play-publisher.
+    - set `githubToken` for release to Gihhub using gradle plugin
+        - https://github.com/riiid/gradle-github-plugin.
+    - set keystore's information for signed apk
+        - `storeFile`, `storePassword`, `keyAlias` and `keyPassword`
+
+
 ## License
 
 MIT © [Yeobara](https://github.com/yeobara)
@@ -36,3 +53,4 @@ MIT © [Yeobara](https://github.com/yeobara)
 [LOLLIPOP]: http://developer.android.com/intl/ko/reference/android/os/Build.VERSION_CODES.html#LOLLIPOP
 [Kotlin]: https://plugins.jetbrains.com/plugin/6954?pr=androidstudio
 [KotlinExtForAndroid]: https://plugins.jetbrains.com/plugin/7717?pr=androidstudio
+[yeobara-desktop]: https://github.com/yeobara/yeobara-desktop#configuration
