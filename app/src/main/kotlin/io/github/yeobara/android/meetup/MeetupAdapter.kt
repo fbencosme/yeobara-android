@@ -329,6 +329,7 @@ public class MeetupAdapter(val activity: Activity,
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setData(uri)
         activity.startActivity(intent)
+        activity.finish()
     }
 
     private fun showGoogleMap(lat: Float, lng: Float, zoom: Int, meetup: Meetup) {

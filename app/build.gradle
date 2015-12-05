@@ -3,14 +3,15 @@ apply plugin: 'kotlin-android'
 apply plugin: 'co.riiid.gradle'
 apply plugin: 'com.github.triplet.play'
 
-def prevVersionName = "0.6.2"
-def currVersionName = "0.7.0"
-def currVersionCode = 18
+def prevVersionName = "0.7.0"
+def currVersionName = "0.7.1"
+def currVersionCode = 19
 def prevTagName = "${prevVersionName}"
 def currTagName = "${currVersionName}"
 def changelog = """
 ### What's New
 - Integrated checkin/checked button with Yeobara's webpage.
+- Fixed bugs.
 
 ### Commit Log
 https://github.com/yeobara/yeobara-android/compare/${prevTagName}...${currTagName}
