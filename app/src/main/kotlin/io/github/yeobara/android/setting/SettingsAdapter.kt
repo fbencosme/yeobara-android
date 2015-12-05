@@ -28,7 +28,7 @@ public class SettingsAdapter(val activity: Activity) :
     private val logout: ((View) -> Unit) = {
         PrefUtils.clearAll(activity)
 
-        val userRef = Firebase("${Const.FB_BASE}/users")
+        val userRef = Firebase("${BuildConfig.FIREBASE_URL}/users")
         userRef.auth?.uid?.let { uid ->
             userRef.child("$uid/gcmToken").setValue(null)
         }

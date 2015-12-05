@@ -44,6 +44,7 @@ android {
         debug {
             applicationIdSuffix '.debug'
             buildConfigField "String", "GCM_SENDER_ID", props.get('gcmSenderId')
+            buildConfigField "String", "FIREBASE_URL", props.get('firebaseUrl')
         }
 
         release {
@@ -51,6 +52,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "GCM_SENDER_ID", props.get('gcmSenderId')
+            buildConfigField "String", "FIREBASE_URL", props.get('firebaseUrl')
         }
     }
 

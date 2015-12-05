@@ -15,6 +15,7 @@ import com.firebase.client.*
 import com.squareup.picasso.Picasso
 import io.github.importre.eddystone.Beacon
 import io.github.importre.eddystone.EddyStoneCallback
+import io.github.yeobara.android.BuildConfig
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.utils.ImageUtils
@@ -35,7 +36,7 @@ public class MeetupAdapter(val activity: Activity,
     private val childEventListener: ChildEventListener
 
     private val meetupsRef: Firebase by lazy {
-        Firebase("${Const.FB_BASE}/meetups")
+        Firebase("${BuildConfig.FIREBASE_URL}/meetups")
     }
 
     private val query: Query by lazy {

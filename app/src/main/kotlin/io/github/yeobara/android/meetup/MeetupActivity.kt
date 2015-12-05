@@ -18,6 +18,7 @@ import com.firebase.client.FirebaseError
 import com.firebase.client.ValueEventListener
 import com.tbruyelle.rxpermissions.RxPermissions
 import io.github.importre.eddystone.EddyStone
+import io.github.yeobara.android.BuildConfig
 import io.github.yeobara.android.R
 import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.gcm.RegistrationIntentService
@@ -38,7 +39,7 @@ class MeetupActivity : AppCompatActivity(), UpdateListener {
     }
 
     private val userRef: Firebase by lazy {
-        Firebase("${Const.FB_BASE}/users")
+        Firebase("${BuildConfig.FIREBASE_URL}/users")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

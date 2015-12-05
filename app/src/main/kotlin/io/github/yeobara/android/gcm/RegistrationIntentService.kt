@@ -8,7 +8,6 @@ import com.google.android.gms.gcm.GcmPubSub
 import com.google.android.gms.gcm.GoogleCloudMessaging
 import com.google.android.gms.iid.InstanceID
 import io.github.yeobara.android.BuildConfig
-import io.github.yeobara.android.app.Const
 import io.github.yeobara.android.utils.PrefUtils
 import java.io.IOException
 
@@ -53,7 +52,7 @@ class RegistrationIntentService : IntentService(RegistrationIntentService.TAG) {
      * @param gcmToken The new token.
      */
     private fun sendRegistrationToServer(gcmToken: String) {
-        val userRef = Firebase("${Const.FB_BASE}/users")
+        val userRef = Firebase("${BuildConfig.FIREBASE_URL}/users")
         val uid = userRef.auth?.uid ?: return
         userRef.child("$uid/gcmToken").setValue(gcmToken)
     }

@@ -2,7 +2,6 @@ package io.github.yeobara.android.app
 
 object Const {
 
-    const public val FB_BASE: String = "https://yeobara.firebaseio.com"
     const public val GITHUB: String = "https://github.com/yeobara"
     const public val GITHUB_ANDROID: String = "https://github.com/yeobara/yeobara-android"
 
