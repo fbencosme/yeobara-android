@@ -230,6 +230,7 @@ public class MeetupAdapter(val activity: Activity,
 
             val checkin = view.getTag(R.id.checkin) as Button
             checkin.text = Const.CHECKIN
+            checkin.isEnabled = true
             checkin.setOnClickListener {
                 openCheckInPage(key)
             }
