@@ -9,7 +9,6 @@
 
 - Android Studio Plugins (_Required_)
   - [Kotlin]
-  - [Kotlin Extensions For Android][KotlinExtForAndroid]
 
 - Device
   - &gt;= [LOLLIPOP]
