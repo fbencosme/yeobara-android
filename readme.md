@@ -29,7 +29,7 @@ See `local.properties.example`.
 - Optionally you can
     - set `playStoreP12File`, `playStorePublisher` for release to PlayStore using gradle plugin
         - https://github.com/Triple-T/gradle-play-publisher.
-    - set `githubToken` for release to Gihhub using gradle plugin
+    - set `githubToken` for release to Github using gradle plugin
         - https://github.com/riiid/gradle-github-plugin.
     - set keystore's information for signed apk
         - `storeFile`, `storePassword`, `keyAlias` and `keyPassword`
