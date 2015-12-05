@@ -22,11 +22,11 @@
 
 See `local.properties.example`.
 
-Basically you must
+- Basically you must
     - set `firebaseUrl` key and be same value as you set in [yeobara-desktop].
     - set `gcmSenderId` for GCM. Also you can refer to [yeobara-desktop].
 
-Optionally you can
+- Optionally you can
     - set `playStoreP12File`, `playStorePublisher` for release to PlayStore using gradle plugin
         - https://github.com/Triple-T/gradle-play-publisher.
     - set `githubToken` for release to Gihhub using gradle plugin
